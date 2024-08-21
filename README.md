@@ -22,6 +22,7 @@ Application for managing students, teachers, administrators, subjects, grades an
 ### **1. Clone the repository:**
    ```bash
    git clone https://github.com/michalswider/ElectronicGradeBookFastApi.git
+   ```
 
 ## **Configuration**
 
@@ -34,3 +35,4 @@ Open the `.env` file and update the environmental variable values with the appro
 
 ```plaintext
 DATABASE_URL=postgresql://<username>:<password>@<host>/<database_name>
+```
