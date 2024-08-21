@@ -77,6 +77,37 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 client = TestClient(app)
 
 
+def test_add_student_class_not_exist():
+    request_data = {
+        'first_name': 'Marcin',
+        'last_name': 'Balcerowicz',
+        'username': 'm_balcerowicz',
+        'password': 'test1234',
+        'date_of_birth': '2002-07-02',
+        'class_id': 999,
+        'role': 'student'
+
+    }
+    response = client.post("admin/add-user", json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Class with id: 999 does not exist'}
+
+
+def test_add_teacher_subject_not_exist():
+    request_data = {
+        'first_name': 'Jan',
+        'last_name': 'Kujawa',
+        'username': 'j_kujawa',
+        'password': 'test1234',
+        'date_of_birth': '1990-03-12',
+        'subject_id': 999,
+        'role': 'teacher'
+    }
+    response = client.post("admin/add-user", json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
 def test_show_all_students(test_student):
     response = client.get('admin/students')
     assert response.status_code == status.HTTP_200_OK

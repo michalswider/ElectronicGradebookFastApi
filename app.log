@@ -38,3 +38,43 @@ Traceback (most recent call last):
 AttributeError: module 'bcrypt' has no attribute '__about__'
 2024-08-21 21:04:47,968 - httpx - INFO - HTTP Request: GET http://testserver/admin/students "HTTP/1.1 200 OK"
 2024-08-21 21:04:48,179 - httpx - INFO - HTTP Request: GET http://testserver/admin/teachers "HTTP/1.1 200 OK"
+2024-08-21 21:25:58,077 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Œwider\Documents\fastapi\fastapienv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2024-08-21 21:25:58,321 - httpx - INFO - HTTP Request: GET http://testserver/admin/students "HTTP/1.1 200 OK"
+2024-08-21 21:25:58,534 - httpx - INFO - HTTP Request: GET http://testserver/admin/teachers "HTTP/1.1 200 OK"
+2024-08-21 21:26:57,449 - ElectronicGradebook.main - ERROR - Error: Class with id: 999 does not exist ~ User: User: test ~ Path: /admin/add-user
+2024-08-21 21:26:57,451 - httpx - INFO - HTTP Request: POST http://testserver/admin/add-user "HTTP/1.1 404 Not Found"
+2024-08-21 21:26:57,613 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Œwider\Documents\fastapi\fastapienv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2024-08-21 21:26:57,838 - httpx - INFO - HTTP Request: GET http://testserver/admin/students "HTTP/1.1 200 OK"
+2024-08-21 21:26:58,052 - httpx - INFO - HTTP Request: GET http://testserver/admin/teachers "HTTP/1.1 200 OK"
+2024-08-21 21:27:21,500 - ElectronicGradebook.main - ERROR - Error: Class with id: 999 does not exist ~ User: User: test ~ Path: /admin/add-user
+2024-08-21 21:27:21,502 - httpx - INFO - HTTP Request: POST http://testserver/admin/add-user "HTTP/1.1 404 Not Found"
+2024-08-21 21:27:21,504 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Œwider\Documents\fastapi\fastapienv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2024-08-21 21:27:21,728 - httpx - INFO - HTTP Request: GET http://testserver/admin/students "HTTP/1.1 200 OK"
+2024-08-21 21:27:21,939 - httpx - INFO - HTTP Request: GET http://testserver/admin/teachers "HTTP/1.1 200 OK"
+2024-08-21 21:30:13,401 - ElectronicGradebook.main - ERROR - Error: Class with id: 999 does not exist ~ User: User: test ~ Path: /admin/add-user
+2024-08-21 21:30:13,403 - httpx - INFO - HTTP Request: POST http://testserver/admin/add-user "HTTP/1.1 404 Not Found"
+2024-08-21 21:30:13,409 - ElectronicGradebook.main - ERROR - Error: Subject with id: 999 does not exist ~ User: User: test ~ Path: /admin/add-user
+2024-08-21 21:30:13,411 - httpx - INFO - HTTP Request: POST http://testserver/admin/add-user "HTTP/1.1 404 Not Found"
+2024-08-21 21:30:13,412 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Œwider\Documents\fastapi\fastapienv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2024-08-21 21:30:13,639 - httpx - INFO - HTTP Request: GET http://testserver/admin/students "HTTP/1.1 200 OK"
+2024-08-21 21:30:13,850 - httpx - INFO - HTTP Request: GET http://testserver/admin/teachers "HTTP/1.1 200 OK"
