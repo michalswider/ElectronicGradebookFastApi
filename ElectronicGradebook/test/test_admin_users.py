@@ -77,6 +77,20 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 client = TestClient(app)
 
 
+def test_add_student(test_student):
+    request_data = {
+        'first_name': 'Andrzej',
+        'last_name': 'Kowalski',
+        'username': 'a_kowalski',
+        'password': 'test1234',
+        'date_of_birth': '2006-12-06',
+        'role': 'student'
+    }
+    response = client.post("admin/add-user", json=request_data)
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json() == None
+
+
 def test_add_student_class_not_exist():
     request_data = {
         'first_name': 'Marcin',
