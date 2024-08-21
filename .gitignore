@@ -1,3 +1,3 @@
 /ElectronicGradebook/.env
-/ElectronicGradebook/app.log
-/ElectronicGradebook/testdb.db
+app.log
+testdb.db
