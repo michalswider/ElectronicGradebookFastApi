@@ -58,7 +58,7 @@ def test_teacher():
         last_name='Kowalska',
         username='a_kowalska',
         hashed_password=bcrypt_context.hash('test1234'),
-        date_of_birth=date(2024, 8, 18),
+        date_of_birth=date(2002, 7, 2),
         role='teacher'
     )
     db = TestingSessionLocal()
@@ -98,3 +98,7 @@ def test_show_all_teachers(test_teacher):
     assert len(teachers) > 0
     teacher_data = next((teacher for teacher in teachers if teacher['username'] == 'a_kowalska'), None)
     assert teacher_data is not None
+    assert teacher_data['first_name'] == 'Anna'
+    assert teacher_data['last_name'] == 'Kowalska'
+    assert teacher_data['username'] == 'a_kowalska'
+    assert teacher_data['role'] == 'teacher'
