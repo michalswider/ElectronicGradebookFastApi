@@ -91,7 +91,7 @@ def test_add_student(test_student):
     assert response.json() == None
 
 
-def test_add_invalid_role():
+def test_add_user_invalid_role():
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
@@ -103,6 +103,20 @@ def test_add_invalid_role():
     response = client.post("admin/add-user", json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Invalid role: tchr. Allowed roles are 'admin', 'teacher','student'."}
+
+
+def test_add_user_username_exist(test_student):
+    request_data = {
+        'first_name': 'Andrzej',
+        'last_name': 'Kowalski',
+        'username': 'j_bravo',
+        'password': 'test1234',
+        'date_of_birth': '2006-12-06',
+        'role': 'student'
+    }
+    response = client.post("admin/add-user", json=request_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': "Username: 'j_bravo' already exist."}
 
 
 def test_add_student_class_not_exist():
