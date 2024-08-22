@@ -175,3 +175,17 @@ def test_show_all_teachers(test_teacher):
     assert teacher_data['last_name'] == 'Kowalska'
     assert teacher_data['username'] == 'a_kowalska'
     assert teacher_data['role'] == 'teacher'
+
+
+def test_show_student_detail(test_student):
+    response = client.get('admin/students/?username=j_bravo')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() is not None
+    students = response.json()
+    student_data = next((student for student in students))
+    assert student_data['first_name'] == 'Johny'
+    assert student_data['last_name'] == 'Bravo'
+    assert student_data['username'] == 'j_bravo'
+    assert student_data['date_of_birth'] == '2024-08-18'
+    assert student_data['class'] == 'No class assigned'
+    assert student_data['role'] == 'student'
