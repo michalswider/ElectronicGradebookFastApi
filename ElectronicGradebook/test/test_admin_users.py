@@ -183,6 +183,7 @@ def test_show_student_detail(test_student):
     assert response.json() is not None
     students = response.json()
     student_data = next((student for student in students))
+    assert student_data['id'] == 1
     assert student_data['first_name'] == 'Johny'
     assert student_data['last_name'] == 'Bravo'
     assert student_data['username'] == 'j_bravo'
