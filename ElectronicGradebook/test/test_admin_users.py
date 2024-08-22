@@ -157,6 +157,7 @@ def test_show_all_students(test_student):
     assert len(students) > 0
     student_data = next((student for student in students if student['username'] == 'j_bravo'), None)
     assert student_data is not None
+    assert student_data['id'] == 1
     assert student_data['first_name'] == 'Johny'
     assert student_data['last_name'] == 'Bravo'
     assert student_data['username'] == 'j_bravo'
@@ -171,6 +172,7 @@ def test_show_all_teachers(test_teacher):
     assert len(teachers) > 0
     teacher_data = next((teacher for teacher in teachers if teacher['username'] == 'a_kowalska'), None)
     assert teacher_data is not None
+    assert teacher_data['id'] == 1
     assert teacher_data['first_name'] == 'Anna'
     assert teacher_data['last_name'] == 'Kowalska'
     assert teacher_data['username'] == 'a_kowalska'
