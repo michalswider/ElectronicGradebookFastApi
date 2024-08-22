@@ -189,3 +189,9 @@ def test_show_student_detail(test_student):
     assert student_data['date_of_birth'] == '2024-08-18'
     assert student_data['class'] == 'No class assigned'
     assert student_data['role'] == 'student'
+
+
+def test_show_student_detail_username_not_found():
+    response = client.get('admin/students/?username=b_bbb')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with username: b_bbb not found'}
