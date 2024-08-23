@@ -198,3 +198,17 @@ def test_show_student_detail_username_not_found():
     response = client.get('admin/students/?username=b_bbb')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with username: b_bbb not found'}
+
+
+def test_show_teacher_detail(test_teacher):
+    response = client.get('admin/teachers/?username=a_kowalska')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() is not None
+    teachers = response.json()
+    teacher_data = next((teacher for teacher in teachers))
+    assert teacher_data['id'] == 1
+    assert teacher_data['first_name'] == 'Anna'
+    assert teacher_data['last_name'] == 'Kowalska'
+    assert teacher_data['username'] == 'a_kowalska'
+    assert teacher_data['subject'] == 'No subject assigned'
+    assert teacher_data['role'] == 'teacher'
