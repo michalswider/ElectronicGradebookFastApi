@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from starlette import status
-from ..models import User, Class
+from ..models import User, Class, Subject
 from ..database import Base
 from ..routers.auth import get_db, get_current_user, bcrypt_context
 from ..main import app
@@ -81,6 +81,20 @@ def test_class():
     yield db
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM classes"))
+        connection.commit()
+
+
+@pytest.fixture()
+def test_subject():
+    subject = Subject(
+        name='Math'
+    )
+    db = TestingSessionLocal()
+    db.add(subject)
+    db.commit()
+    yield db
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM subjects"))
         connection.commit()
 
 
