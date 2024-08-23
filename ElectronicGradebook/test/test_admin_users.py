@@ -212,3 +212,9 @@ def test_show_teacher_detail(test_teacher):
     assert teacher_data['username'] == 'a_kowalska'
     assert teacher_data['subject'] == 'No subject assigned'
     assert teacher_data['role'] == 'teacher'
+
+
+def test_show_teacher_detail_username_not_found():
+    response = client.get('admin/teachers/?username=a_aaa')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with username: a_aaa not found'}
