@@ -134,6 +134,21 @@ def test_add_student_with_class(test_student, test_class):
     assert response.json() is None
 
 
+def test_add_teacher_with_subject(test_teacher, test_subject):
+    request_data = {
+        'first_name': 'Janina',
+        'last_name': 'Borkowska',
+        'username': 'j_borkowska',
+        'password': 'test1234',
+        'date_of_birth': '1987-04-07',
+        'subject_id': 1,
+        'role': 'teacher'
+    }
+    response = client.post("admin/add-user", json=request_data)
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json() is None
+
+
 def test_add_user_invalid_role():
     request_data = {
         'first_name': 'Andrzej',
