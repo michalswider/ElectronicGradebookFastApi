@@ -276,3 +276,18 @@ def test_show_teacher_detail_username_not_found():
     response = client.get('admin/teachers/?username=a_aaa')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with username: a_aaa not found'}
+
+
+def test_edit_user(test_student):
+    request_data = {
+        'first_name': 'Andrzej',
+        'last_name': 'Kowalski',
+        'username': 'a_kowalski'
+    }
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    db = TestingSessionLocal()
+    model = db.query(User).filter(User.username == 'a_kowalski').first()
+    assert model.first_name == request_data.get('first_name')
+    assert model.last_name == request_data.get('last_name')
+    assert model.username == request_data.get('username')
