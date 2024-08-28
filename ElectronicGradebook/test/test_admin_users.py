@@ -117,6 +117,13 @@ def test_add_student(test_student):
     response = client.post("admin/add-user", json=request_data)
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() is None
+    db = TestingSessionLocal()
+    model = db.query(User).filter(User.id == 2).first()
+    assert model.first_name == request_data.get('first_name')
+    assert model.last_name == request_data.get('last_name')
+    assert model.username == request_data.get('username')
+    assert model.date_of_birth.strftime("%Y-%m-%d") == request_data.get('date_of_birth')
+    assert model.role == request_data.get('role')
 
 
 def test_add_student_with_class(test_student, test_class):
