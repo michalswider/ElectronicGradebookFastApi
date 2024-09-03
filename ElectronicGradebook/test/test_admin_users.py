@@ -306,3 +306,14 @@ def test_edit_user(test_student):
     assert model.first_name == request_data.get('first_name')
     assert model.last_name == request_data.get('last_name')
     assert model.username == request_data.get('username')
+
+
+def test_edit_user_username_not_found():
+    request_data = {
+        'first_name': 'Andrzej',
+        'last_name': 'Kowalski',
+        'username': 'a_kowalski'
+    }
+    response = client.put('admin/edit-user/?username=testtest', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with username: testtest not found'}
