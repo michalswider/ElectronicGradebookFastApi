@@ -317,3 +317,14 @@ def test_edit_user_username_not_found():
     response = client.put('admin/edit-user/?username=testtest', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with username: testtest not found'}
+
+
+def test_edit_user_username_already_exist(test_student, test_teacher):
+    request_data = {
+        'first_name': 'Anastazja',
+        'last_name': 'Kowalska',
+        'username': 'a_kowalska'
+    }
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': "Username: 'a_kowalska' already exist."}
