@@ -160,6 +160,9 @@ async def edit_user(edit_user_request: UserRequest, user: user_dependency, db: d
     if edit_user_request.last_name is not None:
         user_model.last_name = edit_user_request.last_name
     if edit_user_request.username is not None:
+        username_model = db.query(User).filter(User.username == edit_user_request.username).first()
+        if username_model is not None:
+            raise UsernameAlreadyExistException(username=edit_user_request.username, user=user.get('username'))
         user_model.username = edit_user_request.username
     if edit_user_request.password is not None:
         user_model.hashed_password = bcrypt_context.hash(edit_user_request.password)
