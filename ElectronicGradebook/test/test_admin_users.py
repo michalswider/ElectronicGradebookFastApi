@@ -328,3 +328,12 @@ def test_edit_user_username_already_exist(test_student, test_teacher):
     response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Username: 'a_kowalska' already exist."}
+
+
+def test_edit_class_not_exist(test_student):
+    request_data = {
+        'class_id': 999
+    }
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Class with id: 999 does not exist'}
