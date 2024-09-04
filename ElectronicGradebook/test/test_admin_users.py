@@ -283,4 +283,12 @@ def test_delete_user_related_grades_error(test_grade):
 def test_delete_user_related_attendance_error(test_attendance):
     response = client.delete('admin/delete-user/1')
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': 'User with id: 1 cannot be deleted because it is associated with table: attendance.'}
+    assert response.json() == {
+        'detail': 'User with id: 1 cannot be deleted because it is associated with table: attendance.'}
+
+
+def test_delete_teacher_related_attendance_error(test_attendance):
+    response = client.delete('admin/delete-user/2')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        'detail': 'User with id: 2 cannot be deleted because it is associated with table: attendance.'}
