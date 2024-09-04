@@ -346,3 +346,12 @@ def test_edit_subject_not_exist(test_teacher):
     response = client.put('admin/edit-user/?username=a_kowalska', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_edit_invalid_role(test_student):
+    request_data = {
+        'role': 'tcher'
+    }
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': "Invalid role: tcher. Allowed roles are 'admin', 'teacher','student'."}
