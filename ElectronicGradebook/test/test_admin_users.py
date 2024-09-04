@@ -337,3 +337,12 @@ def test_edit_class_not_exist(test_student):
     response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
+
+
+def test_edit_subject_not_exist(test_teacher):
+    request_data = {
+        'subject_id': 999
+    }
+    response = client.put('admin/edit-user/?username=a_kowalska', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
