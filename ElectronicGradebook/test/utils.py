@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from ..database import Base
-from ..models import User, Class, Subject
+from ..models import User, Class, Subject, Grade
 from ..routers.auth import bcrypt_context
 from sqlalchemy.pool import StaticPool
 
@@ -90,4 +90,22 @@ def test_subject():
     yield db
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM subjects"))
+        connection.commit()
+
+
+@pytest.mark.usefixtures("test_student", "test_subject", "test_teacher")
+def test_grade():
+    grade = Grade(
+        student_id=1,
+        subject_id=1,
+        grade=5,
+        date=date(2024, 9, 4),
+        added_by_id=2
+    )
+    db = TestingSessionLocal()
+    db.add(grade)
+    db.commit()
+    yield db
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM grades"))
         connection.commit()
