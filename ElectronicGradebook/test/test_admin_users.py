@@ -263,3 +263,11 @@ def test_edit_invalid_role(test_student):
     response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Invalid role: tcher. Allowed roles are 'admin', 'teacher','student'."}
+
+
+def test_delete_user(test_student):
+    response = client.delete('admin/delete-user/1')
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    db = TestingSessionLocal()
+    model = db.query(User).filter(User.id == 1).first()
+    assert model is None
