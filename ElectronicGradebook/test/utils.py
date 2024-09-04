@@ -93,8 +93,8 @@ def test_subject():
         connection.commit()
 
 
-@pytest.mark.usefixtures("test_student", "test_subject", "test_teacher")
-def test_grade():
+@pytest.fixture()
+def test_grade(test_student, test_subject, test_teacher):
     grade = Grade(
         student_id=1,
         subject_id=1,
