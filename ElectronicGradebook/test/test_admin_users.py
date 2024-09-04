@@ -271,3 +271,9 @@ def test_delete_user(test_student):
     db = TestingSessionLocal()
     model = db.query(User).filter(User.id == 1).first()
     assert model is None
+
+
+def test_delete_user_related_grades_error(test_grade):
+    response = client.delete('admin/delete-user/1')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': 'User with id: 1 cannot be deleted because it is associated with table: grades.'}
