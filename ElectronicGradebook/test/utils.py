@@ -46,6 +46,26 @@ def test_student():
         connection.commit()
 
 
+@pytest.fixture
+def test_student_with_class(test_class):
+    student = User(
+        first_name='Johny',
+        last_name='Bravo',
+        username='j_bravo',
+        hashed_password=bcrypt_context.hash('test1234'),
+        date_of_birth=date(2024, 8, 18),
+        class_id=1,
+        role='student'
+    )
+    db = TestingSessionLocal()
+    db.add(student)
+    db.commit()
+    yield db
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM users"))
+        connection.commit()
+
+
 @pytest.fixture()
 def test_teacher():
     teacher = User(
