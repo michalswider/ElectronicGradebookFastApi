@@ -22,3 +22,9 @@ def test_create_class(test_class):
     model = db.query(Class).filter(Class.id == 2).first()
     assert response.status_code == status.HTTP_201_CREATED
     assert model.name == request_data.get('name')
+
+
+def test_show_all_classes(test_class):
+    response = client.get('/admin/classes')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == [{'id': 1, 'name': '1A'}]
