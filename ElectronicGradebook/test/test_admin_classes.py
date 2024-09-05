@@ -28,3 +28,9 @@ def test_show_all_classes(test_class):
     response = client.get('/admin/classes')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [{'id': 1, 'name': '1A'}]
+
+
+def test_show_all_classes_without_classes():
+    response = client.get('/admin/classes')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
