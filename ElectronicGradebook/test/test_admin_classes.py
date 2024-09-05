@@ -69,3 +69,9 @@ def test_delete_class_related_users_error(test_student_with_class):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {
         'detail': 'Class with id: 1 cannot be deleted because it is associated with table: users.'}
+
+
+def test_delete_class_not_exist_class():
+    response = client.delete('admin/classes/999')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Class with id: 999 does not exist'}
