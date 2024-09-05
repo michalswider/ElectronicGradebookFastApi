@@ -45,3 +45,12 @@ def test_edit_class(test_class):
     model = db.query(Class).filter(Class.id == 1).first()
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert model.name == request_data.get('name')
+
+
+def test_edit_class_not_exist_class():
+    request_data = {
+        'name': '1B'
+    }
+    response = client.put('/admin/classes/999', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Class with id: 999 does not exist'}
