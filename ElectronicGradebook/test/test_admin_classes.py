@@ -62,3 +62,10 @@ def test_delete_class(test_class):
     db = TestingSessionLocal()
     model = db.query(Class).filter(Class.id == 1).first()
     assert model is None
+
+
+def test_delete_class_related_users_error(test_student_with_class):
+    response = client.delete('admin/classes/1')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        'detail': 'Class with id: 1 cannot be deleted because it is associated with table: users.'}
