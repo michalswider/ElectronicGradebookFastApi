@@ -34,3 +34,14 @@ def test_show_all_classes_without_classes():
     response = client.get('/admin/classes')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == []
+
+
+def test_edit_class(test_class):
+    request_data = {
+        'name': '1B'
+    }
+    response = client.put('/admin/classes/1', json=request_data)
+    db = TestingSessionLocal()
+    model = db.query(Class).filter(Class.id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model.name == request_data.get('name')
