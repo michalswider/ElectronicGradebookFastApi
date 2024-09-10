@@ -34,3 +34,14 @@ def test_show_all_subjects_without_subjects():
     response = client.get('/admin/subjects')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == []
+
+
+def test_edit_subject(test_subject):
+    request_data = {
+        'name': 'Physics'
+    }
+    response = client.put('admin/subjects/1', json=request_data)
+    db = TestingSessionLocal()
+    model = db.query(Subject).filter(Subject.id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model.name == request_data.get('name')
