@@ -51,6 +51,14 @@ def test_edit_subject_not_exist_subject():
     request_data = {
         'name': 'Physics'
     }
-    response = client.put('/admin/subjects/999',json=request_data)
+    response = client.put('/admin/subjects/999', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_delete_subject(test_subject):
+    response = client.delete('/admin/subjects/1')
+    db = TestingSessionLocal()
+    model = db.query(Subject).filter(Subject.id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model is None
