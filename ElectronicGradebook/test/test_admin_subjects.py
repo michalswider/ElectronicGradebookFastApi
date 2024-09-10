@@ -62,3 +62,9 @@ def test_delete_subject(test_subject):
     model = db.query(Subject).filter(Subject.id == 1).first()
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert model is None
+
+
+def test_delete_subject_not_exist_subject():
+    response = client.delete('/admin/subjects/999')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
