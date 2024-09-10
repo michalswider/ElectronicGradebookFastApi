@@ -28,3 +28,9 @@ def test_show_all_subjects(test_subject):
     response = client.get('/admin/subjects')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [{'id': 1, 'name': 'Math'}]
+
+
+def test_show_all_subjects_without_subjects():
+    response = client.get('/admin/subjects')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
