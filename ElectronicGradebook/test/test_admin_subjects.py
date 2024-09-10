@@ -22,3 +22,9 @@ def test_create_subject(test_subject):
     model = db.query(Subject).filter(Subject.id == 2).first()
     assert response.status_code == status.HTTP_201_CREATED
     assert model.name == request_data.get('name')
+
+
+def test_show_all_subjects(test_subject):
+    response = client.get('/admin/subjects')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == [{'id': 1, 'name': 'Math'}]
