@@ -68,3 +68,10 @@ def test_delete_subject_not_exist_subject():
     response = client.delete('/admin/subjects/999')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_delete_subject_related_grades_error(test_grade):
+    response = client.delete('/admin/subjects/1')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': 'Subject with id: 1 cannot be deleted because it is associated with table: '
+                                         'grades.'}
