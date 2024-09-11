@@ -40,3 +40,15 @@ def test_add_attendance_user_not_found(test_attendance):
     response = client.post('/teacher/add-attendance', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with id: 999 not found'}
+
+
+def test_add_attendance_subject_not_exist(test_attendance):
+    request_data = {
+        'student_id': 1,
+        'subject_id': 999,
+        'class_date': '2024-09-11',
+        'status': 'absent'
+    }
+    response = client.post('/teacher/add-attendance', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
