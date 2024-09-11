@@ -52,3 +52,15 @@ def test_add_attendance_subject_not_exist(test_attendance):
     response = client.post('/teacher/add-attendance', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_add_attendance_invalid_status(test_attendance):
+    request_data = {
+        'student_id': 1,
+        'subject_id': 1,
+        'class_date': '2024-09-11',
+        'status': 'abnt'
+    }
+    response = client.post('/teacher/add-attendance', json=request_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'detail': "Invalid status: abnt. Allowed status are 'present', 'absent', 'excused'."}
