@@ -75,3 +75,10 @@ def test_delete_subject_related_grades_error(test_grade):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 1 cannot be deleted because it is associated with table: '
                                          'grades.'}
+
+
+def test_delete_subject_related_attendance_error(test_attendance):
+    response = client.delete('/admin/subjects/1')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {
+        'detail': 'Subject with id: 1 cannot be deleted because it is associated with table: attendance.'}
