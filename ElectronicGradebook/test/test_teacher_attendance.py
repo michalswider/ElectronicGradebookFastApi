@@ -28,3 +28,15 @@ def test_add_attendance(test_attendance):
     assert model.subject_id == request_data.get('subject_id')
     assert model.class_date.strftime("%Y-%m-%d") == request_data.get('class_date')
     assert model.status == request_data.get('status')
+
+
+def test_add_attendance_user_not_found(test_attendance):
+    request_data = {
+        'student_id': 999,
+        'subject_id': 1,
+        'class_date': '2024-09-11',
+        'status': 'absent'
+    }
+    response = client.post('/teacher/add-attendance', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with id: 999 not found'}
