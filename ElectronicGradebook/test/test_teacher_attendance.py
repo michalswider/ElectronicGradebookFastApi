@@ -71,3 +71,9 @@ def test_show_student_attendance(test_attendance):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'Math': [{'id': 1, 'class_date': '2024-09-04', 'status': 'present', 'added_by': 'Anna '
                                                                                                                'Kowalska'}]}
+
+
+def test_show_student_attendance_user_not_found():
+    response = client.get('/teacher/show-student-attendance/999')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with id: 999 not found'}
