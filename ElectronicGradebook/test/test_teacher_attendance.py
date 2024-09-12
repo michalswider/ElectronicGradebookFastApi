@@ -64,3 +64,10 @@ def test_add_attendance_invalid_status(test_attendance):
     response = client.post('/teacher/add-attendance', json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Invalid status: abnt. Allowed status are 'present', 'absent', 'excused'."}
+
+
+def test_show_student_attendance(test_attendance):
+    response = client.get('/teacher/show-student-attendance/1')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {'Math': [{'id': 1, 'class_date': '2024-09-04', 'status': 'present', 'added_by': 'Anna '
+                                                                                                               'Kowalska'}]}
