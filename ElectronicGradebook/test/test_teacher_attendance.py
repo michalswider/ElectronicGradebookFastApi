@@ -83,3 +83,10 @@ def test_show_student_attendance_student_attendance_not_found(test_student):
     response = client.get('/teacher/show-student-attendance/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'No attendance records found for student with id: 1'}
+
+
+def test_get_attendance_for_class_on_date(test_attendance):
+    response = client.get('teacher/attendance/class/1/date?date=2024-09-04')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {'1A': {
+        'Math': {'Johny Bravo': [{'class_date': '2024-09-04', 'status': 'present', 'added_by': 'Anna Kowalska'}]}}}
