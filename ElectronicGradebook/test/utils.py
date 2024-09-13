@@ -152,7 +152,7 @@ def test_grade(test_student, test_subject, test_teacher):
 
 
 @pytest.fixture()
-def test_attendance(test_student, test_subject, test_teacher):
+def test_attendance(test_student_with_class, test_subject, test_teacher):
     attendance = Attendance(
         student_id=1,
         subject_id=1,
@@ -167,3 +167,5 @@ def test_attendance(test_student, test_subject, test_teacher):
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM attendance"))
         connection.commit()
+
+
