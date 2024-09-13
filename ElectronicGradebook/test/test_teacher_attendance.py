@@ -90,3 +90,9 @@ def test_get_attendance_for_class_on_date(test_attendance):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'1A': {
         'Math': {'Johny Bravo': [{'class_date': '2024-09-04', 'status': 'present', 'added_by': 'Anna Kowalska'}]}}}
+
+
+def test_get_attendance_for_class_on_date_class_not_exist():
+    response = client.get('teacher/attendance/class/999/date?date=2024-09-04')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Class with id: 999 does not exist'}
