@@ -134,6 +134,20 @@ def test_subject():
 
 
 @pytest.fixture()
+def test_subject2():
+    subject = Subject(
+        name='Physics'
+    )
+    db = TestingSessionLocal()
+    db.add(subject)
+    db.commit()
+    yield db
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM subjects"))
+        connection.commit()
+
+
+@pytest.fixture()
 def test_grade(test_student, test_subject, test_teacher):
     grade = Grade(
         student_id=1,
@@ -152,7 +166,7 @@ def test_grade(test_student, test_subject, test_teacher):
 
 
 @pytest.fixture()
-def test_attendance(test_student_with_class, test_subject, test_teacher):
+def test_attendance(test_student_with_class, test_subject,test_subject2, test_teacher):
     attendance = Attendance(
         student_id=1,
         subject_id=1,
@@ -167,5 +181,3 @@ def test_attendance(test_student_with_class, test_subject, test_teacher):
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM attendance"))
         connection.commit()
-
-
