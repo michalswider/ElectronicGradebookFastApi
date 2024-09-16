@@ -120,3 +120,9 @@ def test_get_attendance_for_student_in_subject_user_id_not_found(test_subject):
     response = client.get('teacher/attendance/subject/1/student/999')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with id: 999 not found'}
+
+
+def test_get_attendance_for_student_in_subject_attendance_not_found(test_student, test_subject):
+    response = client.get('teacher/attendance/subject/1/student/1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'No attendance records found for student with id: 1 in subject with id: 1'}
