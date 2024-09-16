@@ -135,3 +135,10 @@ def test_edit_attendance_status(test_attendance):
     model = db.query(Attendance).filter(Attendance.id == 1).first()
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert model.status == request_data.get('status')
+
+
+def test_edit_attendance_status_attendance_not_found():
+    request_data = {'status': 'absent'}
+    response = client.put('teacher/edit-attendance/1/1/999', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Attendance with id: 999 not found.'}
