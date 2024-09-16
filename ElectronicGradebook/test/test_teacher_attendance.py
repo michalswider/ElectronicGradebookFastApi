@@ -107,4 +107,10 @@ def test_get_attendance_for_class_on_date_attendance_not_found(test_student_with
 def test_get_attendance_for_student_in_subject(test_attendance):
     response = client.get('teacher/attendance/subject/1/student/1')
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == [{'id': 1,'class_date': '2024-09-04','status': 'present','added_by': 'Anna Kowalska'}]
+    assert response.json() == [{'id': 1, 'class_date': '2024-09-04', 'status': 'present', 'added_by': 'Anna Kowalska'}]
+
+
+def test_get_attendance_for_student_in_subject_subject_not_exist():
+    response = client.get('teacher/attendance/subject/999/student/1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
