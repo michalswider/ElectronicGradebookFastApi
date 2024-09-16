@@ -149,3 +149,10 @@ def test_edit_attendance_status_subject_not_exist(test_attendance):
     response = client.put('teacher/edit-attendance/1/999/1', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_edit_attendance_status_user_id_not_found(test_attendance):
+    request_data = {'status': 'absent'}
+    response = client.put('teacher/edit-attendance/999/1/1', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with id: 999 not found'}
