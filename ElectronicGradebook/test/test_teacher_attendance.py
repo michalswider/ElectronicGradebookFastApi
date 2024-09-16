@@ -170,3 +170,11 @@ def test_edit_attendance_status_invalid_status(test_attendance):
     response = client.put('teacher/edit-attendance/1/1/1', json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Invalid status: abst. Allowed status are 'present', 'absent', 'excused'."}
+
+
+def test_delete_attendance(test_attendance):
+    response = client.delete('teacher/delete-attendance/1/1/1')
+    db = TestingSessionLocal()
+    model = db.query(Attendance).filter(Attendance.id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model is None
