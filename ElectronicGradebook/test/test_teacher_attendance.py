@@ -126,3 +126,12 @@ def test_get_attendance_for_student_in_subject_attendance_not_found(test_student
     response = client.get('teacher/attendance/subject/1/student/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'No attendance records found for student with id: 1 in subject with id: 1'}
+
+
+def test_edit_attendance_status(test_attendance):
+    request_data = {'status': 'absent'}
+    response = client.put('teacher/edit-attendance/1/1/1', json=request_data)
+    db = TestingSessionLocal()
+    model = db.query(Attendance).filter(Attendance.id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model.status == request_data.get('status')
