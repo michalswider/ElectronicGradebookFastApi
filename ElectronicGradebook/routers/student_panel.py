@@ -29,8 +29,6 @@ async def show_profile_detail(user: user_dependency, db: db_dependency):
     if user.get('role') not in ('admin', 'student'):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
     student_model = db.query(User).filter(User.id == user.get('id')).all()
-    if student_model is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Detail not found')
     result = []
     for detail in student_model:
         result.append({
