@@ -184,3 +184,9 @@ def test_delete_attendance_user_id_not_found(test_attendance):
     response = client.delete('teacher/delete-attendance/999/1/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with id: 999 not found'}
+
+
+def test_delete_attendance_subject_not_exist(test_attendance):
+    response = client.delete('teacher/delete-attendance/1/999/1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
