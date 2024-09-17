@@ -28,7 +28,7 @@ async def show_profile_detail(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
     if user.get('role') not in ('admin', 'student'):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    student_model = db.query(User).join(Class, User.class_id == Class.id).filter(User.id == user.get('id')).all()
+    student_model = db.query(User).filter(User.id == user.get('id')).all()
     if student_model is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Detail not found')
     result = []
@@ -38,7 +38,7 @@ async def show_profile_detail(user: user_dependency, db: db_dependency):
             "last_name": detail.last_name,
             'username': detail.username,
             "date_of_birth": detail.date_of_birth,
-            "class": detail.klasa.name,
+            "class": detail.klasa.name if detail.klasa else "No class assigned",
             "role": detail.role
         })
     return result
