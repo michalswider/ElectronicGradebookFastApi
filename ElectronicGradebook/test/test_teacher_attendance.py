@@ -178,3 +178,9 @@ def test_delete_attendance(test_attendance):
     model = db.query(Attendance).filter(Attendance.id == 1).first()
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert model is None
+
+
+def test_delete_attendance_user_id_not_found(test_attendance):
+    response = client.delete('teacher/delete-attendance/999/1/1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with id: 999 not found'}
