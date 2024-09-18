@@ -27,3 +27,12 @@ def test_show_profile_detail_with_class(test_student_with_class):
     assert response.json() == [
         {'first_name': 'Johny', 'last_name': 'Bravo', 'username': 'j_bravo', 'date_of_birth': '2024-08-18',
          'class': '1A', 'role': 'student'}]
+
+
+def test_reset_password(test_student):
+    request_data = {
+        'old_password': 'test1234',
+        'new_password': 'testtest'
+    }
+    response = client.put('student/reset-password', json=request_data)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
