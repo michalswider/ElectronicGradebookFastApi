@@ -66,3 +66,9 @@ def test_show_student_grades_user_id_not_found():
     response = client.get('teacher/grades/999')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with id: 999 not found'}
+
+
+def test_show_student_grades_not_found(test_student, test_subject):
+    response = client.get('teacher/grades/1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Grades for user with id: 1 not found'}
