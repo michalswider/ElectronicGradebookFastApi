@@ -1,7 +1,7 @@
 from typing import Annotated
 from ..models import Grade, Subject, Attendance
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -19,7 +19,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 class UserVerification(BaseModel):
     old_password: str
-    new_password: str
+    new_password: str = Field(min_length=6)
 
 
 @router.get("/profile", status_code=status.HTTP_200_OK)
