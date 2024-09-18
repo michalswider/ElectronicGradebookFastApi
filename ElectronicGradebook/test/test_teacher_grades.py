@@ -42,3 +42,15 @@ def test_add_grade_user_id_not_found(test_grade):
     response = client.post('teacher/grades/add-grade', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with id: 999 not found'}
+
+
+def test_add_grade_subject_not_exist(test_student):
+    request_data = {
+        'student_id': 1,
+        'subject_id': 999,
+        'grade': 2,
+        'date': '2024-09-18'
+    }
+    response = client.post('teacher/grades/add-grade', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
