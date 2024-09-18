@@ -52,3 +52,9 @@ def test_show_grades(test_grade):
     response = client.get('student/grades')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'Math': [{'grade': 5, 'date': '2024-09-04', 'added_by': 'Anna Kowalska'}]}
+
+
+def test_show_grades_not_found(test_student):
+    response = client.get('student/grades')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Not found'}
