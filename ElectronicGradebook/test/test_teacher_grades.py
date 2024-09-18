@@ -30,3 +30,15 @@ def test_add_grade(test_grade):
     assert model.subject_id == request_data.get('subject_id')
     assert model.grade == request_data.get('grade')
     assert model.date.strftime("%Y-%m-%d") == request_data.get('date')
+
+
+def test_add_grade_user_id_not_found(test_grade):
+    request_data = {
+        'student_id': 999,
+        'subject_id': 1,
+        'grade': 2,
+        'date': '2024-09-18'
+    }
+    response = client.post('teacher/grades/add-grade', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with id: 999 not found'}
