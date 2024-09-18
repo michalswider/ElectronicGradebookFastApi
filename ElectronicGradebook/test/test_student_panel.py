@@ -46,3 +46,9 @@ def test_reset_password_invalid_current_password(test_student):
     response = client.put('student/reset-password', json=request_data)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json() == {'detail': 'Error on password change'}
+
+
+def test_show_grades(test_grade):
+    response = client.get('student/grades')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {'Math': [{'grade': 5, 'date': '2024-09-04', 'added_by': 'Anna Kowalska'}]}
