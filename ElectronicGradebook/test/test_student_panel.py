@@ -36,3 +36,13 @@ def test_reset_password(test_student):
     }
     response = client.put('student/reset-password', json=request_data)
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_reset_password_invalid_current_password(test_student):
+    request_data = {
+        'old_password': 'test',
+        'new_password': 'testtest'
+    }
+    response = client.put('student/reset-password', json=request_data)
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {'detail': 'Error on password change'}
