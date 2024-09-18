@@ -54,3 +54,9 @@ def test_add_grade_subject_not_exist(test_student):
     response = client.post('teacher/grades/add-grade', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_show_student_grades(test_grade):
+    response = client.get('teacher/grades/1')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {'Math': [{'id': 1, 'grade': 5, 'date': '2024-09-04', 'added_by': 'Anna Kowalska'}]}
