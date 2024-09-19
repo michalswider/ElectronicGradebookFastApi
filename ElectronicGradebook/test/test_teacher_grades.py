@@ -85,3 +85,9 @@ def test_get_students_grades_for_subject_class_not_exist():
     response = client.get('teacher/grades/class/999/subject/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
+
+
+def test_get_students_grades_for_subject_not_exist(test_class):
+    response = client.get('teacher/grades/class/1/subject/999')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
