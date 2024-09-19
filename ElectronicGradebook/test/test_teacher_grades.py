@@ -121,3 +121,9 @@ def test_show_average_student_for_subject_average_not_found(test_student, test_s
     response = client.get('teacher/grades/average/subject/1?student_id=1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'No average found for subject id: 1 and student id: 1.'}
+
+
+def test_show_average_by_class(test_grade):
+    response = client.get('teacher/grades/average/class/1')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {'class': '1A', 'average_grade': 5.0}
