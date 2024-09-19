@@ -148,7 +148,7 @@ def test_subject2():
 
 
 @pytest.fixture()
-def test_grade(test_student, test_subject, test_teacher):
+def test_grade(test_student_with_class, test_subject, test_teacher):
     grade = Grade(
         student_id=1,
         subject_id=1,
