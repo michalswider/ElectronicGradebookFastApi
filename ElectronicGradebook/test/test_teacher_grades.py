@@ -103,3 +103,9 @@ def test_show_average_student_for_subject(test_grade):
     response = client.get('teacher/grades/average/subject/1?student_id=1')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'average_grade': 5.0}
+
+
+def test_show_average_student_for_subject_not_exist():
+    response = client.get('teacher/grades/average/subject/999?student_id=1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
