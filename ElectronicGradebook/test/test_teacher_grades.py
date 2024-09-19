@@ -72,3 +72,10 @@ def test_show_student_grades_not_found(test_student, test_subject):
     response = client.get('teacher/grades/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Grades for user with id: 1 not found'}
+
+
+def test_get_students_grades_for_subject(test_grade):
+    response = client.get('teacher/grades/class/1/subject/1')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        'Johny Bravo': [{'id': 1, 'grade': 5, 'date': '2024-09-04', 'added_by': 'Anna Kowalska'}]}
