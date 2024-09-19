@@ -127,3 +127,9 @@ def test_show_average_by_class(test_grade):
     response = client.get('teacher/grades/average/class/1')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'class': '1A', 'average_grade': 5.0}
+
+
+def test_show_average_by_class_not_exist():
+    response = client.get('teacher/grades/average/class/999')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Class with id: 999 does not exist'}
