@@ -186,6 +186,7 @@ async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grad
         raise GradeEditNotExistException(student_id=student_id,grade_id=grade_id,subject_id=subject_id, username=user.get('username'))
     grade_model.grade = edit_grade_request.grade
     grade_model.date = edit_grade_request.date
+    grade_model.added_by_id = user.get('id')
     db.commit()
     return {"message": "Grade edited successfully"}
 
