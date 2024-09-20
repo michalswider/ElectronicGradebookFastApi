@@ -188,7 +188,6 @@ async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grad
     grade_model.date = edit_grade_request.date
     grade_model.added_by_id = user.get('id')
     db.commit()
-    return {"message": "Grade edited successfully"}
 
 
 @router.delete("/grades/{student_id}/{subject_id}/{grade_id}", status_code=status.HTTP_204_NO_CONTENT)
