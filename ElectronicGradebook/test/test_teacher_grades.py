@@ -139,3 +139,16 @@ def test_show_average_by_class_average_not_found(test_class):
     response = client.get('teacher/grades/average/class/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'No average found for class id: 1.'}
+
+
+def test_edit_student_grade(test_grade):
+    request_data = {
+        'grade': 1,
+        'date': '2024-09-20'
+    }
+    response = client.put('teacher/grades/1?subject_id=1&grade_id=1', json=request_data)
+    db = TestingSessionLocal()
+    model = db.query(Grade).filter(Grade.id == 1, Grade.subject_id == 1, Grade.student_id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model.grade == request_data.get('grade')
+    assert model.date.strftime("%Y-%m-%d") == request_data.get('date')
