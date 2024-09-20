@@ -172,3 +172,13 @@ def test_edit_student_grade_subject_not_exist(test_student):
     response = client.put('teacher/grades/1?subject_id=999&grade_id=1', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_edit_student_grade_not_found(test_student, test_subject):
+    request_data = {
+        'grade': 1,
+        'date': '2024-09-20'
+    }
+    response = client.put('teacher/grades/1?subject_id=1&grade_id=999', json=request_data)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Grade with id: 999 not found, for user id: 1 on subject id: 1'}
