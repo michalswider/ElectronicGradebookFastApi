@@ -16,6 +16,7 @@ Application for managing students, teachers, administrators, subjects, grades an
 - **PostgreSQL**: Relational database management system.
 - **Uvicorn**: ASGI server for running FastAPI applications.
 - **RotatingFileHandler**: For managing log files with rotation.
+- **Pytest**: Framework for writing unit tests to ensure application reliability and correctness.
 
 ## **Installation**
 
