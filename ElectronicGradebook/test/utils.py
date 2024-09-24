@@ -40,7 +40,7 @@ def test_student():
     db = TestingSessionLocal()
     db.add(student)
     db.commit()
-    yield db
+    yield student
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users"))
         connection.commit()
@@ -60,7 +60,7 @@ def test_student_with_class(test_class):
     db = TestingSessionLocal()
     db.add(student)
     db.commit()
-    yield db
+    yield student
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users"))
         connection.commit()
@@ -79,7 +79,7 @@ def test_teacher():
     db = TestingSessionLocal()
     db.add(teacher)
     db.commit()
-    yield db
+    yield teacher
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users"))
         connection.commit()
@@ -99,7 +99,7 @@ def test_teacher_with_subject(test_subject):
     db = TestingSessionLocal()
     db.add(teacher)
     db.commit()
-    yield db
+    yield teacher
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM users"))
         connection.commit()
@@ -113,7 +113,7 @@ def test_class():
     db = TestingSessionLocal()
     db.add(test_class)
     db.commit()
-    yield db
+    yield test_class
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM classes"))
         connection.commit()
@@ -127,7 +127,7 @@ def test_subject():
     db = TestingSessionLocal()
     db.add(subject)
     db.commit()
-    yield db
+    yield subject
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM subjects"))
         connection.commit()
@@ -141,7 +141,7 @@ def test_subject2():
     db = TestingSessionLocal()
     db.add(subject)
     db.commit()
-    yield db
+    yield subject
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM subjects"))
         connection.commit()
@@ -159,7 +159,7 @@ def test_grade(test_student_with_class, test_subject, test_teacher):
     db = TestingSessionLocal()
     db.add(grade)
     db.commit()
-    yield db
+    yield grade
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM grades"))
         connection.commit()
@@ -177,7 +177,7 @@ def test_attendance(test_student_with_class, test_subject,test_subject2, test_te
     db = TestingSessionLocal()
     db.add(attendance)
     db.commit()
-    yield db
+    yield attendance
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM attendance"))
         connection.commit()
