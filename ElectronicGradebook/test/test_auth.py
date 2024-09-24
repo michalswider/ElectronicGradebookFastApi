@@ -18,3 +18,9 @@ def test_authenticate_user_wrong_username():
     db = TestingSessionLocal()
     authenticated_user = authenticate_user("wrong_username", 'test1234', db)
     assert authenticated_user is False
+
+
+def test_authenticate_user_wrong_password(test_student):
+    db = TestingSessionLocal()
+    authenticated_user = authenticate_user(test_student.username, 'wrong_password', db)
+    assert authenticated_user is False
