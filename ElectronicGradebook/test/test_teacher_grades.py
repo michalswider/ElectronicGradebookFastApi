@@ -190,3 +190,9 @@ def test_delete_grade(test_grade):
     model = db.query(Grade).filter(Grade.id == 1).first()
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert model is None
+
+
+def test_delete_grade_user_id_not_found():
+    response = client.delete('teacher/grades/999/1/1')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'User with id: 999 not found'}
