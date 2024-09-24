@@ -182,3 +182,11 @@ def test_edit_student_grade_not_found(test_student, test_subject):
     response = client.put('teacher/grades/1?subject_id=1&grade_id=999', json=request_data)
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Grade with id: 999 not found, for user id: 1 on subject id: 1'}
+
+
+def test_delete_grade(test_grade):
+    response = client.delete('teacher/grades/1/1/1')
+    db = TestingSessionLocal()
+    model = db.query(Grade).filter(Grade.id == 1).first()
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert model is None
