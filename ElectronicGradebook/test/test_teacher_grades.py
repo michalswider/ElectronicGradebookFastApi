@@ -202,3 +202,9 @@ def test_delete_grade_subject_not_exist(test_student):
     response = client.delete('teacher/grades/1/999/1')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
+
+
+def test_delete_grade_not_found(test_subject, test_student):
+    response = client.delete('teacher/grades/1/1/999')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {'detail': 'Grade with the specified student_id, subject_id, and grade_id not found'}
