@@ -30,6 +30,8 @@ Application for managing students, teachers, administrators, subjects, grades an
 ## **Configuration**
 
 ### **1. Using Docker:**
+To run the application with Docker, use the provided docker-compose.yml file. Build and start the containers with:
    ```bash
    docker-compose up --build
    ```
+Upon startup, the FastAPI application will automatically create an `admin` user in the database with the password `admin`.
