@@ -35,3 +35,7 @@ To run the application with Docker, use the provided `compose.yml` file. Build a
    docker-compose up --build
    ```
 Upon startup, the FastAPI application will automatically create an `admin` user in the database with the password `admin`.
+
+The application will be available at the following ports:
+- **FastAPI**: `http://localhost:8000`
+- **pgadmin4**: `http://localhost:8080`
