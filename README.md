@@ -15,7 +15,9 @@ Application for managing students, teachers, administrators, subjects, grades an
 - **SQLAlchemy**: SQL toolkit and Object-Relational Mapping (ORM) library.
 - **PostgreSQL**: Relational database management system.
 - **Uvicorn**: ASGI server for running FastAPI applications.
+- **Pydantic**: Data validation and settings management using Python type annotations, primarily used for request validation and data serialization in FastAPI.
 - **RotatingFileHandler**: For managing log files with rotation.
+- **Pytest**: Framework for writing unit tests to ensure application reliability and correctness.
 
 ## **Installation**
 
