@@ -39,3 +39,7 @@ Upon startup, the FastAPI application will automatically create an `admin` user 
 The application will be available at the following ports:
 - **FastAPI**: `http://localhost:8000`
 - **pgadmin4**: `http://localhost:8080`
+
+pgAdmin login:
+- **Email Address**: `admin@example.com`
+- **Password**: `admin`
