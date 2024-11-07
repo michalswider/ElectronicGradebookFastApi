@@ -18,6 +18,7 @@ Application for managing students, teachers, administrators, subjects, grades an
 - **Pydantic**: Data validation and settings management using Python type annotations, primarily used for request validation and data serialization in FastAPI.
 - **RotatingFileHandler**: For managing log files with rotation.
 - **Pytest**: Framework for writing unit tests to ensure application reliability and correctness.
+- **Docker**: The application is containerized, making it easy to deploy and run in different environments.
 
 ## **Installation**
 
@@ -28,13 +29,7 @@ Application for managing students, teachers, administrators, subjects, grades an
 
 ## **Configuration**
 
-### **1. Rename the file:**
- - Go to the project directory ElectronicGradebook .
- - Change the name of the `.env.example` file to `.env`.
-
-### **2. Update environment variables**
-Open the `.env` file and update the environmental variable values with the appropriate data for your environment.
-
-```plaintext
-DATABASE_URL=postgresql://<username>:<password>@<host>/<database_name>
-```
+### **1. Using Docker:**
+   ```bash
+   docker-compose up --build
+   ```
