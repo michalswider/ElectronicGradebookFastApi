@@ -2,10 +2,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from sqlalchemy.orm import Session
 from starlette import status
-from ..exception import UsernameNotFoundException, ClassNotExistException, SubjectNotExistException, InvalidRoleException, \
-    UserIdNotFoundException, UsernameAlreadyExistException, UserDeleteException
-from ..models import User, Class, Subject, Grade, Attendance
-from ..routers.auth import get_db, bcrypt_context, get_current_user
+from ..exception import UserIdNotFoundException, UserDeleteException
+from ..models import User,Grade, Attendance
+from ..routers.auth import get_db,get_current_user
 from ..services.user_service import create_user,edit_users
 from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
     validate_subject_exist, validate_roles, validate_username_found
