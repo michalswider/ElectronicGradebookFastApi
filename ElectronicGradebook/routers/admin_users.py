@@ -1,9 +1,7 @@
-from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from sqlalchemy.orm import Session
 from starlette import status
-from pydantic import BaseModel, Field
 from ..exception import UsernameNotFoundException, ClassNotExistException, SubjectNotExistException, InvalidRoleException, \
     UserIdNotFoundException, UsernameAlreadyExistException, UserDeleteException
 from ..models import User, Class, Subject, Grade, Attendance
