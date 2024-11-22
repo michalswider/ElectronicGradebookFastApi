@@ -5,7 +5,7 @@ from ..routers.auth import get_db
 from fastapi import HTTPException
 from starlette import status
 from ..models import User,Class,Subject
-from ..exception import UsernameAlreadyExistException,ClassNotExistException,SubjectNotExistException
+from ..exception import UsernameAlreadyExistException,ClassNotExistException,SubjectNotExistException, InvalidRoleException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -29,3 +29,8 @@ def validate_subject_exist(user: dict, subject_id: int, db: db_dependency):
     subjects = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subjects:
         raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
+
+def validate_roles(role: str, user: dict):
+    valid_roles = ['admin','teacher','student']
+    if role not in valid_roles:
+        raise InvalidRoleException(role=role, username=user.get('username'))
