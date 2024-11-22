@@ -12,6 +12,7 @@ from ..services.user_service import create_user
 from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
     validate_subject_exist, validate_roles, validate_username_found
 from ..response_models.user import map_student_to_response, map_teacher_to_response
+from ..schemas.user import CreateUserRequest,EditUserRequest
 
 router = APIRouter(
     prefix='/admin',
@@ -19,23 +20,13 @@ router = APIRouter(
 )
 
 
-class UserRequest(BaseModel):
-    first_name: Optional[str] = Field(None, min_length=1)
-    last_name: Optional[str] = Field(None, min_length=1)
-    username: Optional[str] = None
-    password: Optional[str] = Field(None, min_length=6)
-    date_of_birth: Optional[date] = None
-    class_id: Optional[int] = None
-    subject_id: Optional[int] = None
-    role: Optional[str] = None
-
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/add-user", status_code=status.HTTP_201_CREATED)
-async def add_user(user: user_dependency,create_user_request: UserRequest, db: db_dependency):
+async def add_user(user: user_dependency,create_user_request: CreateUserRequest, db: db_dependency):
     verify_admin_user(user)
     validate_username_exist(user, create_user_request.username, db)
     if create_user_request.class_id:
@@ -81,7 +72,7 @@ async def show_teacher_detail(db: db_dependency, user: user_dependency, username
 
 
 @router.put("/edit-user/", status_code=status.HTTP_204_NO_CONTENT)
-async def edit_user(edit_user_request: UserRequest, user: user_dependency, db: db_dependency, username: str = Query()):
+async def edit_user(edit_user_request: EditUserRequest, user: user_dependency, db: db_dependency, username: str = Query()):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
     if user.get('role') != 'admin':
