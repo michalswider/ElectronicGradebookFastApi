@@ -10,7 +10,7 @@ from ..models import User, Class, Subject, Grade, Attendance
 from ..routers.auth import get_db, bcrypt_context, get_current_user
 from ..services.user_service import create_user
 from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
-    validate_subject_exist, validate_roles
+    validate_subject_exist, validate_roles, validate_username_found
 from ..response_models.user import map_student_to_response, map_teacher_to_response
 
 router = APIRouter(
@@ -66,17 +66,8 @@ async def show_all_teachers(db: db_dependency, user: user_dependency):
 async def show_student_detail(db: db_dependency, user: user_dependency, username: str = Query()):
     verify_admin_user(user)
     student = db.query(User).filter(User.username == username, User.role == 'student').first()
-    if student is None:
-        raise UsernameNotFoundException(username=username, user=user.get('username'))
-    result = [{'id': student.id,
-               'first_name': student.first_name,
-               'last_name': student.last_name,
-               'username': student.username,
-               'hashed_password': student.hashed_password,
-               'date_of_birth': student.date_of_birth,
-               'class': student.klasa.name if student.klasa else "No class assigned",
-               'role': student.role
-               }]
+    validate_username_found(student,user, username)
+    result = map_student_to_response(student)
     return result
 
 
