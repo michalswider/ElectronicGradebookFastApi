@@ -30,19 +30,19 @@ def edit_users(request: dict, db: db_dependency, user_model, user: dict):
         user_model.last_name = request.last_name
     if request.username is not None:
         validate_username_exist(user,request.username,db)
-    user_model.username = request.username
+        user_model.username = request.username
     if request.password is not None:
         user_model.hashed_password = bcrypt_context.hash(request.password)
     if request.date_of_birth is not None:
         user_model.date_of_birth = request.date_of_birth
     if request.class_id is not None:
         validate_class_exist(user,request.class_id, db)
-    user_model.class_id = request.class_id
+        user_model.class_id = request.class_id
     if request.subject_id is not None:
         validate_subject_exist(user, request.subject_id, db)
-    user_model.subject_id = request.subject_id
+        user_model.subject_id = request.subject_id
     if request.role is not None:
         validate_roles(request.role, user)
-    user_model.role = request.role
+        user_model.role = request.role
 
     db.commit()
