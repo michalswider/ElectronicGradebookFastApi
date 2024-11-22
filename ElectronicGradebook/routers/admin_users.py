@@ -64,10 +64,7 @@ async def show_all_teachers(db: db_dependency, user: user_dependency):
 
 @router.get("/students/", status_code=status.HTTP_200_OK)
 async def show_student_detail(db: db_dependency, user: user_dependency, username: str = Query()):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
+    verify_admin_user(user)
     student = db.query(User).filter(User.username == username, User.role == 'student').first()
     if student is None:
         raise UsernameNotFoundException(username=username, user=user.get('username'))
