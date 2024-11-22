@@ -1,3 +1,4 @@
 /ElectronicGradebook/.env
 app.log
 testdb.db
+.idea
