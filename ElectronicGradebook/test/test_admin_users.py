@@ -165,14 +165,13 @@ def test_show_student_detail(test_student):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() is not None
     students = response.json()
-    student_data = next((student for student in students))
-    assert student_data['id'] == 1
-    assert student_data['first_name'] == 'Johny'
-    assert student_data['last_name'] == 'Bravo'
-    assert student_data['username'] == 'j_bravo'
-    assert student_data['date_of_birth'] == '2024-08-18'
-    assert student_data['class'] == 'No class assigned'
-    assert student_data['role'] == 'student'
+    assert students['id'] == 1
+    assert students['first_name'] == 'Johny'
+    assert students['last_name'] == 'Bravo'
+    assert students['username'] == 'j_bravo'
+    assert students['date_of_birth'] == '2024-08-18'
+    assert students['class'] == 'No class assigned'
+    assert students['role'] == 'student'
 
 
 def test_show_student_detail_username_not_found():
