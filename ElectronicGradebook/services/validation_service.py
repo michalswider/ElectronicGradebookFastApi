@@ -35,7 +35,6 @@ def validate_roles(role: str, user: dict):
     if role not in valid_roles:
         raise InvalidRoleException(role=role, username=user.get('username'))
 
-def validate_username_found(user_model):
+def validate_username_found(user_model: User, user:dict, username: str):
     if user_model is None:
-        raise UsernameNotFoundException(username=username, user=user.get('username'))
-    return user_model
+        raise UsernameNotFoundException(username=username , user=user.get('username'))
