@@ -11,7 +11,7 @@ from ..routers.auth import get_db, bcrypt_context, get_current_user
 from ..services.user_service import create_user
 from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
     validate_subject_exist, validate_roles
-from ..response_models.user import map_student_to_response
+from ..response_models.user import map_student_to_response, map_teacher_to_response
 
 router = APIRouter(
     prefix='/admin',
@@ -56,21 +56,9 @@ async def show_all_students(db: db_dependency, user: user_dependency):
 
 @router.get("/teachers", status_code=status.HTTP_200_OK)
 async def show_all_teachers(db: db_dependency, user: user_dependency):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
+    verify_admin_user(user)
     teachers = db.query(User).filter(User.role == 'teacher').all()
-    result = []
-    for teacher in teachers:
-        result.append({'id': teacher.id,
-                       'first_name': teacher.first_name,
-                       'last_name': teacher.last_name,
-                       'username': teacher.username,
-                       'hashed_password': teacher.hashed_password,
-                       'subject': teacher.subject.name if teacher.subject else "No subject assigned",
-                       'role': teacher.role
-                       })
+    result = [map_teacher_to_response(teacher) for teacher in teachers]
     return result
 
 
