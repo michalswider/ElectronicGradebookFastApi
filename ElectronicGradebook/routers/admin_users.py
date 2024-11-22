@@ -8,6 +8,9 @@ from ..exception import UsernameNotFoundException, ClassNotExistException, Subje
     UserIdNotFoundException, UsernameAlreadyExistException, UserDeleteException
 from ..models import User, Class, Subject, Grade, Attendance
 from ..routers.auth import get_db, bcrypt_context, get_current_user
+from ..services.user_service import create_user
+from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
+    validate_subject_exist, validate_roles
 
 router = APIRouter(
     prefix='/admin',
@@ -32,36 +35,14 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @router.post("/add-user", status_code=status.HTTP_201_CREATED)
 async def add_user(user: user_dependency,create_user_request: UserRequest, db: db_dependency):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    username_model = db.query(User).filter(User.username == create_user_request.username).first()
-    if username_model is not None:
-        raise UsernameAlreadyExistException(username=create_user_request.username, user=user.get('username'))
-    if create_user_request.class_id is not None:
-        classes = db.query(Class).filter(Class.id == create_user_request.class_id).first()
-        if not classes:
-            raise ClassNotExistException(class_id=create_user_request.class_id, username=user.get('username'))
-    if create_user_request.subject_id is not None:
-        subjects = db.query(Subject).filter(Subject.id == create_user_request.subject_id).first()
-        if not subjects:
-            raise SubjectNotExistException(subject_id=create_user_request.subject_id, username=user.get('username'))
-    if create_user_request.role not in ('admin', 'teacher', 'student'):
-        raise InvalidRoleException(role=create_user_request.role, username=user.get('username'))
-    user_model = User(
-        first_name=create_user_request.first_name,
-        last_name=create_user_request.last_name,
-        username=create_user_request.username,
-        hashed_password=bcrypt_context.hash(create_user_request.password),
-        date_of_birth=create_user_request.date_of_birth,
-        class_id=create_user_request.class_id,
-        subject_id=create_user_request.subject_id,
-        role=create_user_request.role
-    )
-
-    db.add(user_model)
-    db.commit()
+    verify_admin_user(user)
+    validate_username_exist(user, create_user_request.username, db)
+    if create_user_request.class_id:
+        validate_class_exist(user, create_user_request.class_id, db)
+    if create_user_request.subject_id:
+        validate_subject_exist(user, create_user_request.subject_id, db)
+    validate_roles(create_user_request.role, user)
+    create_user(create_user_request, db)
 
 
 @router.get("/students", status_code=status.HTTP_200_OK)
