@@ -6,7 +6,7 @@ from ..exception import UsernameNotFoundException, ClassNotExistException, Subje
     UserIdNotFoundException, UsernameAlreadyExistException, UserDeleteException
 from ..models import User, Class, Subject, Grade, Attendance
 from ..routers.auth import get_db, bcrypt_context, get_current_user
-from ..services.user_service import create_user
+from ..services.user_service import create_user,edit_users
 from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
     validate_subject_exist, validate_roles, validate_username_found
 from ..response_models.user import map_student_to_response, map_teacher_to_response
@@ -71,42 +71,11 @@ async def show_teacher_detail(db: db_dependency, user: user_dependency, username
 
 @router.put("/edit-user/", status_code=status.HTTP_204_NO_CONTENT)
 async def edit_user(edit_user_request: EditUserRequest, user: user_dependency, db: db_dependency, username: str = Query()):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
+    verify_admin_user(user)
     user_model = db.query(User).filter(User.username == username).first()
-    if user_model is None:
-        raise UsernameNotFoundException(username=username, user=user.get('username'))
-    if edit_user_request.first_name is not None:
-        user_model.first_name = edit_user_request.first_name
-    if edit_user_request.last_name is not None:
-        user_model.last_name = edit_user_request.last_name
-    if edit_user_request.username is not None:
-        username_model = db.query(User).filter(User.username == edit_user_request.username).first()
-        if username_model is not None:
-            raise UsernameAlreadyExistException(username=edit_user_request.username, user=user.get('username'))
-        user_model.username = edit_user_request.username
-    if edit_user_request.password is not None:
-        user_model.hashed_password = bcrypt_context.hash(edit_user_request.password)
-    if edit_user_request.date_of_birth is not None:
-        user_model.date_of_birth = edit_user_request.date_of_birth
-    if edit_user_request.class_id is not None:
-        classes = db.query(Class).filter(Class.id == edit_user_request.class_id).first()
-        if not classes:
-            raise ClassNotExistException(class_id=edit_user_request.class_id, username=user.get('username'))
-        user_model.class_id = edit_user_request.class_id
-    if edit_user_request.subject_id is not None:
-        subjects = db.query(Subject).filter(Subject.id == edit_user_request.subject_id).first()
-        if not subjects:
-            raise SubjectNotExistException(subject_id=edit_user_request.subject_id, username=user.get('username'))
-        user_model.subject_id = edit_user_request.subject_id
-    if edit_user_request.role is not None:
-        if edit_user_request.role not in ('admin', 'teacher', 'student'):
-            raise InvalidRoleException(role=edit_user_request.role, username=user.get('username'))
-        user_model.role = edit_user_request.role
+    validate_username_found(user_model, user,username)
+    edit_users(edit_user_request,db,user_model,user)
 
-    db.commit()
 
 
 @router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
