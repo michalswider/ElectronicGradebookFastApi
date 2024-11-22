@@ -18,6 +18,7 @@ Application for managing students, teachers, administrators, subjects, grades an
 - **Pydantic**: Data validation and settings management using Python type annotations, primarily used for request validation and data serialization in FastAPI.
 - **RotatingFileHandler**: For managing log files with rotation.
 - **Pytest**: Framework for writing unit tests to ensure application reliability and correctness.
+- **Docker**: The application is containerized, making it easy to deploy and run in different environments.
 
 ## **Installation**
 
@@ -28,13 +29,17 @@ Application for managing students, teachers, administrators, subjects, grades an
 
 ## **Configuration**
 
-### **1. Rename the file:**
- - Go to the project directory ElectronicGradebook .
- - Change the name of the `.env.example` file to `.env`.
+### **1. Using Docker:**
+To run the application with Docker, use the provided `compose.yml` file. Build and start the containers with:
+   ```bash
+   docker-compose up --build
+   ```
+Upon startup, the FastAPI application will automatically create an `admin` user in the database with the password `admin`.
 
-### **2. Update environment variables**
-Open the `.env` file and update the environmental variable values with the appropriate data for your environment.
+The application will be available at the following ports:
+- **FastAPI**: `http://localhost:8000`
+- **pgadmin4**: `http://localhost:8080`
 
-```plaintext
-DATABASE_URL=postgresql://<username>:<password>@<host>/<database_name>
-```
+pgAdmin login:
+- **Email Address**: `admin@example.com`
+- **Password**: `admin`
