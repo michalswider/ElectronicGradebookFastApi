@@ -4,8 +4,8 @@ from fastapi import Depends
 from ..routers.auth import get_db
 from fastapi import HTTPException
 from starlette import status
-from ..models import User,Class
-from ..exception import UsernameAlreadyExistException,ClassNotExistException
+from ..models import User,Class,Subject
+from ..exception import UsernameAlreadyExistException,ClassNotExistException,SubjectNotExistException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -24,3 +24,8 @@ def validate_class_exist(user: dict,class_id:int,db: db_dependency):
     classes = db.query(Class).filter(Class.id == class_id).first()
     if not classes:
         raise ClassNotExistException(class_id=class_id, username=user.get('username'))
+
+def validate_subject_exist(user: dict, subject_id: int, db: db_dependency):
+    subjects = db.query(Subject).filter(Subject.id == subject_id).first()
+    if not subjects:
+        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
