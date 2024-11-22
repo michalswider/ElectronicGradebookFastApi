@@ -185,13 +185,12 @@ def test_show_teacher_detail(test_teacher):
     assert response.status_code == status.HTTP_200_OK
     assert response.json() is not None
     teachers = response.json()
-    teacher_data = next((teacher for teacher in teachers))
-    assert teacher_data['id'] == 1
-    assert teacher_data['first_name'] == 'Anna'
-    assert teacher_data['last_name'] == 'Kowalska'
-    assert teacher_data['username'] == 'a_kowalska'
-    assert teacher_data['subject'] == 'No subject assigned'
-    assert teacher_data['role'] == 'teacher'
+    assert teachers['id'] == 1
+    assert teachers['first_name'] == 'Anna'
+    assert teachers['last_name'] == 'Kowalska'
+    assert teachers['username'] == 'a_kowalska'
+    assert teachers['subject'] == 'No subject assigned'
+    assert teachers['role'] == 'teacher'
 
 
 def test_show_teacher_detail_username_not_found():
