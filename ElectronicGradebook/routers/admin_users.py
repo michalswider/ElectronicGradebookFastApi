@@ -5,9 +5,9 @@ from starlette import status
 from ..exception import UserIdNotFoundException, UserDeleteException
 from ..models import User,Grade, Attendance
 from ..routers.auth import get_db,get_current_user
-from ..services.user_service import create_user,edit_users
+from ..services.user_service import create_user, edit_users, delete_users
 from ..services.validation_service import verify_admin_user, validate_username_exist, validate_class_exist, \
-    validate_subject_exist, validate_roles, validate_username_found
+    validate_subject_exist, validate_roles, validate_username_found, validate_user_id
 from ..response_models.user import map_student_to_response, map_teacher_to_response
 from ..schemas.user import CreateUserRequest,EditUserRequest
 
@@ -79,24 +79,6 @@ async def edit_user(edit_user_request: EditUserRequest, user: user_dependency, d
 
 @router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(db: db_dependency, user: user_dependency, user_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    user_model = db.query(User).filter(User.id == user_id).first()
-    related_grades = db.query(Grade).filter(Grade.student_id == user_id).all()
-    related_grades_added_by = db.query(Grade).filter(Grade.added_by_id == user_id).all()
-    related_attendance = db.query(Attendance).filter(Attendance.student_id == user_id).all()
-    related_attendance_added_by = db.query(Attendance).filter(Attendance.added_by_id == user_id).all()
-    if user_model is None:
-        raise UserIdNotFoundException(user_id=user_id, username=user.get('username'))
-    if related_grades:
-        raise UserDeleteException(user_id=user_id, table_name='grades', username=user.get('username'))
-    if related_grades_added_by:
-        raise UserDeleteException(user_id=user_id, table_name='grades', username=user.get('username'))
-    if related_attendance:
-        raise UserDeleteException(user_id=user_id, table_name='attendance', username=user.get('username'))
-    if related_attendance_added_by:
-        raise UserDeleteException(user_id=user_id, table_name='attendance', username=user.get('username'))
-    db.query(User).filter(User.id == user_id).delete()
-    db.commit()
+    verify_admin_user(user)
+    validate_user_id(user_id, db, user)
+    delete_users(user_id, db, user)

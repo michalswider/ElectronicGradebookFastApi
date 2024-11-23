@@ -1,9 +1,10 @@
 from typing import Annotated
-from ElectronicGradebook.models import User
+from ElectronicGradebook.models import User, Grade, Attendance
 from ElectronicGradebook.routers.auth import bcrypt_context, get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from ..services.validation_service import validate_username_exist, validate_class_exist, validate_subject_exist, validate_roles
+from ..services.validation_service import validate_username_exist, validate_class_exist, validate_subject_exist, \
+    validate_roles, validate_database_relation
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -45,4 +46,14 @@ def edit_users(request: dict, db: db_dependency, user_model, user: dict):
         validate_roles(request.role, user)
         user_model.role = request.role
 
+    db.commit()
+
+def delete_users(user_id: int, db: db_dependency, user : dict):
+    related_records = {
+        "grades": db.query(Grade).filter((Grade.student_id == user_id) | (Grade.added_by_id == user_id)).first(),
+        "attendance": db.query(Attendance).filter(
+            (Attendance.student_id == user_id) | (Attendance.added_by_id == user_id)).first()
+    }
+    validate_database_relation(related_records,user_id,user)
+    db.query(User).filter(User.id == user_id).delete()
     db.commit()
