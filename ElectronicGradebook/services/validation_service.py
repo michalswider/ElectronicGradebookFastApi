@@ -5,7 +5,8 @@ from ..routers.auth import get_db
 from fastapi import HTTPException
 from starlette import status
 from ..models import User,Class,Subject
-from ..exception import UsernameAlreadyExistException,ClassNotExistException,SubjectNotExistException, InvalidRoleException, UsernameNotFoundException
+from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
+    InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -38,3 +39,13 @@ def validate_roles(role: str, user: dict):
 def validate_username_found(user_model: User, user:dict, username: str):
     if user_model is None:
         raise UsernameNotFoundException(username=username , user=user.get('username'))
+
+def validate_database_relation(related_records: dict, user_id: int, user: dict):
+    for table_name,record in related_records.items():
+        if record:
+            raise UserDeleteException(user_id=user_id, table_name=table_name, username=user.get('username'))
+
+def validate_user_id(user_id, db: db_dependency, user: dict):
+    user_model = db.query(User).filter(User.id == user_id).first()
+    if user_model is None:
+        raise UserIdNotFoundException(user_id=user_id, username=user.get('username'))
