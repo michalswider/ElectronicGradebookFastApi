@@ -41,5 +41,4 @@ async def edit_class(db: db_dependency, user: user_dependency, create_class_requ
 async def delete_class(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0)):
     verify_admin_user(user)
     validate_class_exist(user, class_id, db)
-    validate_related_class(class_id, user, db)
-    delete_classes(class_id, db)
+    delete_classes(class_id,user, db)
