@@ -6,7 +6,8 @@ from fastapi import HTTPException
 from starlette import status
 from ..models import User,Class,Subject
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
-    InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException
+    InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
+    SubjectDeleteException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -44,6 +45,11 @@ def validate_database_relation(related_records: dict, user_id: int, user: dict):
     for table_name,record in related_records.items():
         if record:
             raise UserDeleteException(user_id=user_id, table_name=table_name, username=user.get('username'))
+
+def validate_database_subjects_relation(related_records: dict, subject_id: int, user: dict):
+    for table_name,record in related_records.items():
+        if record:
+            raise SubjectDeleteException(subject_id=subject_id, table_name=table_name, username=user.get('username'))
 
 def validate_user_id(user_id, db: db_dependency, user: dict):
     user_model = db.query(User).filter(User.id == user_id).first()
