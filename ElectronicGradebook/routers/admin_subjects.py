@@ -6,8 +6,8 @@ from ..models import Subject, Grade, Attendance, User
 from ..exception import SubjectNotExistException, SubjectDeleteException
 from ..routers.auth import get_db, get_current_user
 from ..schemas.subjects import CreateSubjectRequest
-from ..services.subject_service import add_subject
-from ..services.validation_service import verify_admin_user
+from ..services.subject_service import add_subject, edit_subjects
+from ..services.validation_service import verify_admin_user, validate_subject_exist
 
 router = APIRouter(
     prefix="/admin",
@@ -33,15 +33,9 @@ async def show_all_subjects(db: db_dependency, user: user_dependency):
 @router.put("/subjects/{subject_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def edit_subject(db: db_dependency, create_subject_request: CreateSubjectRequest, user: user_dependency,
                        subject_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    subject_model = db.query(Subject).filter(Subject.id == subject_id).first()
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
-    subject_model.name = create_subject_request.name
-    db.commit()
+    verify_admin_user(user)
+    validate_subject_exist(user, subject_id, db)
+    edit_subjects(create_subject_request, subject_id, db)
 
 
 @router.delete("/subjects/{subject_id}", status_code=status.HTTP_204_NO_CONTENT)
