@@ -2,8 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
-from ..models import Subject, Grade, Attendance, User
-from ..exception import SubjectNotExistException, SubjectDeleteException
+from ..models import Subject
 from ..routers.auth import get_db, get_current_user
 from ..schemas.subjects import CreateSubjectRequest
 from ..services.subject_service import add_subject, edit_subjects, delete_subjects

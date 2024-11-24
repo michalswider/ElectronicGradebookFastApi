@@ -1,13 +1,12 @@
 from typing import Annotated
-from ..models import Class, User
+from ..models import Class
 from fastapi import APIRouter, Depends, Path, HTTPException
 from ..schemas.classes import CreateClassRequest
 from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_current_user, get_db
-from ..exception import ClassNotExistException, ClassDeleteException
 from ..services.class_service import add_class, edit_classes, delete_classes
-from ..services.validation_service import verify_admin_user, validate_class_exist, validate_related_class
+from ..services.validation_service import verify_admin_user, validate_class_exist
 
 router = APIRouter(
     prefix="/admin",
