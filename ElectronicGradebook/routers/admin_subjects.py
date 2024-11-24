@@ -6,6 +6,8 @@ from ..models import Subject, Grade, Attendance, User
 from ..exception import SubjectNotExistException, SubjectDeleteException
 from ..routers.auth import get_db, get_current_user
 from ..schemas.subjects import CreateSubjectRequest
+from ..services.subject_service import add_subject
+from ..services.validation_service import verify_admin_user
 
 router = APIRouter(
     prefix="/admin",
@@ -18,13 +20,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @router.post("/subjects", status_code=status.HTTP_201_CREATED)
 async def create_subject(create_subject_request: CreateSubjectRequest, user: user_dependency, db: db_dependency):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    subject_model = Subject(**create_subject_request.dict())
-    db.add(subject_model)
-    db.commit()
+    verify_admin_user(user)
+    add_subject(create_subject_request, db)
 
 
 @router.get("/subjects", status_code=status.HTTP_200_OK)
