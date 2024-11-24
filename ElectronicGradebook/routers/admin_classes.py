@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_current_user, get_db
 from ..exception import ClassNotExistException, ClassDeleteException
-from ..services.class_service import add_class
-from ..services.validation_service import verify_admin_user
+from ..services.class_service import add_class, edit_classes
+from ..services.validation_service import verify_admin_user, validate_class_exist
 
 router = APIRouter(
     prefix="/admin",
@@ -32,15 +32,9 @@ async def show_all_classes(db: db_dependency, user: user_dependency):
 @router.put("/classes/{class_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def edit_class(db: db_dependency, user: user_dependency, create_class_request: CreateClassRequest,
                      class_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    class_model = db.query(Class).filter(Class.id == class_id).first()
-    if class_model is None:
-        raise ClassNotExistException(class_id=class_id, username=user.get('username'))
-    class_model.name = create_class_request.name
-    db.commit()
+    verify_admin_user(user)
+    validate_class_exist(user, class_id, db)
+    edit_classes(create_class_request, class_id, db)
 
 
 @router.delete("/classes/{class_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -11,3 +11,8 @@ def add_class(request: CreateClassRequest, db):
     class_model = Class(**request.dict())
     db.add(class_model)
     db.commit()
+
+def edit_classes(request: CreateClassRequest, class_id: int, db: db_dependency):
+    class_model = db.query(Class).filter(Class.id == class_id).first()
+    class_model.name = request.name
+    db.commit()
