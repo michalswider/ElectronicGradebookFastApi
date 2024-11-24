@@ -25,10 +25,7 @@ async def create_class(db: db_dependency, user: user_dependency, create_class_re
 
 @router.get("/classes", status_code=status.HTTP_200_OK)
 async def show_all_classes(db: db_dependency, user: user_dependency):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
+    verify_admin_user(user)
     return db.query(Class).all()
 
 
