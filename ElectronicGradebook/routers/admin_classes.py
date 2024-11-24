@@ -5,7 +5,9 @@ from ..schemas.classes import CreateClassRequest
 from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_current_user, get_db
-from ..exception import ClassNotExistException,ClassDeleteException
+from ..exception import ClassNotExistException, ClassDeleteException
+from ..services.class_service import add_class
+from ..services.validation_service import verify_admin_user
 
 router = APIRouter(
     prefix="/admin",
@@ -16,17 +18,10 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-
 @router.post("/classes", status_code=status.HTTP_201_CREATED)
 async def create_class(db: db_dependency, user: user_dependency, create_class_request: CreateClassRequest):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    class_model = Class(**create_class_request.dict())
-    db.add(class_model)
-    db.commit()
-
+    verify_admin_user(user)
+    add_class(create_class_request, db)
 
 @router.get("/classes", status_code=status.HTTP_200_OK)
 async def show_all_classes(db: db_dependency, user: user_dependency):
