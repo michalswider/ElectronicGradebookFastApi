@@ -1,12 +1,11 @@
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, Path, HTTPException
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from ..models import Subject, Grade, Attendance, User
 from ..exception import SubjectNotExistException, SubjectDeleteException
 from ..routers.auth import get_db, get_current_user
+from ..schemas.subjects import CreateSubjectRequest
 
 router = APIRouter(
     prefix="/admin",
@@ -15,10 +14,6 @@ router = APIRouter(
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
-
-
-class CreateSubjectRequest(BaseModel):
-    name: str = Field(min_length=1)
 
 
 @router.post("/subjects", status_code=status.HTTP_201_CREATED)
