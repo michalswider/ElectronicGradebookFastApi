@@ -17,6 +17,12 @@ def verify_admin_user(user: dict):
     if user.get('role') != 'admin':
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
 
+def verify_teacher_user(user: dict):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
+    if user.get('role') not in ('admin', 'teacher'):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
+
 def validate_username_exist(user: dict, username: str,db: db_dependency):
     username_model = db.query(User).filter(User.username == username).first()
     if username_model is not None:

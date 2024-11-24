@@ -4,13 +4,14 @@ from ..exception import UserIdNotFoundException, SubjectNotExistException, Grade
     AverageBySubjectForStudentNotFoundException, ClassNotExistException
 from fastapi import Path, HTTPException
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from ..models import Grade, Subject, User, Class
 from ..routers.auth import get_db
 from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
+from ..services.grade_service import create_grade
+from ..services.validation_service import verify_teacher_user
 
 router = APIRouter(
     prefix="/teacher",
@@ -23,19 +24,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @router.post("/grades/add-grade", status_code=status.HTTP_201_CREATED)
 async def add_grade(db: db_dependency, user: user_dependency, add_grade_request: AddGradeRequest):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    student = db.query(User).filter(User.id == add_grade_request.student_id, User.role == 'student').first()
-    subject = db.query(Subject).filter(Subject.id == add_grade_request.subject_id).first()
-    if not student:
-        raise UserIdNotFoundException(user_id=add_grade_request.student_id, username=user.get('username'))
-    if not subject:
-        raise SubjectNotExistException(subject_id=add_grade_request.subject_id, username=user.get('username'))
-    grade_model = Grade(**add_grade_request.dict(), added_by_id=user.get('id'))
-    db.add(grade_model)
-    db.commit()
+    verify_teacher_user(user)
+    create_grade(add_grade_request, user, db)
     return {"message": "Grade added successfully"}
 
 
