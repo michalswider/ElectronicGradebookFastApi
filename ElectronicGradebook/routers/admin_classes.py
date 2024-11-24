@@ -1,7 +1,7 @@
 from typing import Annotated
 from ..models import Class, User
 from fastapi import APIRouter, Depends, Path, HTTPException
-from pydantic import BaseModel, Field
+from ..schemas.classes import CreateClassRequest
 from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_current_user, get_db
@@ -15,9 +15,6 @@ router = APIRouter(
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
-
-class CreateClassRequest(BaseModel):
-    name: str = Field(min_length=1)
 
 
 @router.post("/classes", status_code=status.HTTP_201_CREATED)
