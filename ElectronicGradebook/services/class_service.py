@@ -16,3 +16,7 @@ def edit_classes(request: CreateClassRequest, class_id: int, db: db_dependency):
     class_model = db.query(Class).filter(Class.id == class_id).first()
     class_model.name = request.name
     db.commit()
+
+def delete_classes(class_id: int, db: db_dependency):
+    db.query(Class).filter(Class.id == class_id).delete()
+    db.commit()

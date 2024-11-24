@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_current_user, get_db
 from ..exception import ClassNotExistException, ClassDeleteException
-from ..services.class_service import add_class, edit_classes
-from ..services.validation_service import verify_admin_user, validate_class_exist
+from ..services.class_service import add_class, edit_classes, delete_classes
+from ..services.validation_service import verify_admin_user, validate_class_exist, validate_related_class
 
 router = APIRouter(
     prefix="/admin",
@@ -39,15 +39,7 @@ async def edit_class(db: db_dependency, user: user_dependency, create_class_requ
 
 @router.delete("/classes/{class_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_class(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') != 'admin':
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    class_model = db.query(Class).filter(Class.id == class_id).first()
-    related_users = db.query(User).filter(User.class_id == class_id).all()
-    if related_users:
-        raise ClassDeleteException(class_id=class_id, table_name="users", username=user.get('username'))
-    if class_model is None:
-        raise ClassNotExistException(class_id=class_id, username=user.get('username'))
-    db.query(Class).filter(Class.id == class_id).delete()
-    db.commit()
+    verify_admin_user(user)
+    validate_class_exist(user, class_id, db)
+    validate_related_class(class_id, user, db)
+    delete_classes(class_id, db)
