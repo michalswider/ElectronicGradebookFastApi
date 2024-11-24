@@ -1,6 +1,7 @@
 from typing import Annotated
 from ..exception import UserIdNotFoundException, SubjectNotExistException, GradesNotFoundException, \
-    GradeEditNotExistException, GradeForSubjectNotExistException, AverageByClassNotFoundException, AverageBySubjectForStudentNotFoundException, ClassNotExistException
+    GradeEditNotExistException, GradeForSubjectNotExistException, AverageByClassNotFoundException, \
+    AverageBySubjectForStudentNotFoundException, ClassNotExistException
 from fastapi import Path, HTTPException
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -8,8 +9,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from ..models import Grade, Subject, User, Class
 from ..routers.auth import get_db
-from datetime import date
 from ..routers.auth import get_current_user
+from ..schemas.grades import AddGradeRequest, EditGradeRequest
 
 router = APIRouter(
     prefix="/teacher",
@@ -18,18 +19,6 @@ router = APIRouter(
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
-
-
-class AddGradeRequest(BaseModel):
-    student_id: int = Field(gt=0)
-    subject_id: int = Field(gt=0)
-    grade: int = Field(gt=0, lt=7)
-    date: date
-
-
-class EditGradeRequest(BaseModel):
-    grade: int = Field(gt=0, lt=7)
-    date: date
 
 
 @router.post("/grades/add-grade", status_code=status.HTTP_201_CREATED)
@@ -100,7 +89,7 @@ async def get_students_grades_for_subject(db: db_dependency, user: user_dependen
     if subject_model is None:
         raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
     if not grade_model:
-        raise GradeForSubjectNotExistException(class_id=class_id,subject_id=subject_id, username=user.get('username'))
+        raise GradeForSubjectNotExistException(class_id=class_id, subject_id=subject_id, username=user.get('username'))
     result = {}
 
     for grade in grade_model:
@@ -132,7 +121,8 @@ async def show_average_student_for_subject(db: db_dependency, user: user_depende
     if student_model is None:
         raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
     if not grade_model:
-        raise AverageBySubjectForStudentNotFoundException(subject_id=subject_id,student_id=student_id, username=user.get('username'))
+        raise AverageBySubjectForStudentNotFoundException(subject_id=subject_id, student_id=student_id,
+                                                          username=user.get('username'))
     values = []
     for grade in grade_model:
         values.append(grade.grade)
@@ -183,7 +173,8 @@ async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grad
     if subject_model is None:
         raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
     if grade_model is None:
-        raise GradeEditNotExistException(student_id=student_id,grade_id=grade_id,subject_id=subject_id, username=user.get('username'))
+        raise GradeEditNotExistException(student_id=student_id, grade_id=grade_id, subject_id=subject_id,
+                                         username=user.get('username'))
     grade_model.grade = edit_grade_request.grade
     grade_model.date = edit_grade_request.date
     grade_model.added_by_id = user.get('id')
@@ -207,6 +198,7 @@ async def delete_grade(db: db_dependency, user: user_dependency, student_id: int
     if subject_model is None:
         raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
     if grade_model is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Grade with the specified student_id, subject_id, and grade_id not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Grade with the specified student_id, subject_id, and grade_id not found')
     db.delete(grade_model)
     db.commit()
