@@ -7,12 +7,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from starlette import status
 from ..models import Grade, Subject, User, Class
-from ..response_models.grade import map_grades_to_response
+from ..response_models.grade import map_grades_to_response, map_grades_to_students_response
 from ..routers.auth import get_db
 from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
 from ..services.grade_service import create_grade
-from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades
+from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades, \
+    validate_class_exist, validate_subject_exist, validate_grades_for_subject
 
 router = APIRouter(
     prefix="/teacher",
@@ -41,36 +42,11 @@ async def show_student_grades(db: db_dependency, user: user_dependency, student_
 @router.get("/grades/class/{class_id}/subject/{subject_id}", status_code=status.HTTP_200_OK)
 async def get_students_grades_for_subject(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0),
                                           subject_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    grade_model = db.query(Grade).join(User, Grade.student_id == User.id).join(Subject,
-                                                                               Grade.subject_id == Subject.id).join(
-        Class, User.class_id == Class.id).filter(
-        Class.id == class_id, Grade.subject_id == subject_id).all()
-    class_model = db.query(Class).filter(Class.id == class_id).first()
-    subject_model = db.query(Subject).filter(Subject.id == subject_id).first()
-    if class_model is None:
-        raise ClassNotExistException(class_id=class_id, username=user.get('username'))
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
-    if not grade_model:
-        raise GradeForSubjectNotExistException(class_id=class_id, subject_id=subject_id, username=user.get('username'))
-    result = {}
-
-    for grade in grade_model:
-        student = grade.student.first_name + " " + grade.student.last_name
-        if student not in result:
-            result[student] = []
-
-        result[student].append({
-            'id': grade.id,
-            'grade': grade.grade,
-            'date': grade.date,
-            'added_by': grade.teacher.first_name + " " + grade.teacher.last_name
-        })
-    return result
+    verify_teacher_user(user)
+    validate_class_exist(user,class_id,db)
+    validate_subject_exist(user, subject_id, db)
+    grade_model = validate_grades_for_subject(subject_id,class_id,user, db)
+    return map_grades_to_students_response(grade_model)
 
 
 @router.get("/grades/average/subject/{subject_id}", status_code=status.HTTP_200_OK)

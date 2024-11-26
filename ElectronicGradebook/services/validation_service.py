@@ -7,7 +7,7 @@ from starlette import status
 from ..models import User, Class, Subject, Grade
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
-    SubjectDeleteException, GradesNotFoundException
+    SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -78,3 +78,12 @@ def validate_user_grades(student_id: int, user: dict, db: db_dependency):
     if not grades:
         raise GradesNotFoundException(student_id=student_id, username=user.get('username'))
     return grades
+
+def validate_grades_for_subject(subject_id: int,class_id: int,user: dict, db: db_dependency):
+    grade_model = db.query(Grade).join(User, Grade.student_id == User.id).join(Subject,
+                                                                               Grade.subject_id == Subject.id).join(
+        Class, User.class_id == Class.id).filter(
+        Class.id == class_id, Grade.subject_id == subject_id).all()
+    if not grade_model:
+        raise GradeForSubjectNotExistException(class_id=class_id, subject_id=subject_id, username=user.get('username'))
+    return grade_model
