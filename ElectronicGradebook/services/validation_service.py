@@ -7,7 +7,8 @@ from starlette import status
 from ..models import User, Class, Subject, Grade
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
-    SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException
+    SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
+    AverageBySubjectForStudentNotFoundException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -86,4 +87,11 @@ def validate_grades_for_subject(subject_id: int,class_id: int,user: dict, db: db
         Class.id == class_id, Grade.subject_id == subject_id).all()
     if not grade_model:
         raise GradeForSubjectNotExistException(class_id=class_id, subject_id=subject_id, username=user.get('username'))
+    return grade_model
+
+def validate_average_student_for_subject(subject_id: int, student_id: int,user:dict, db: db_dependency):
+    grade_model = db.query(Grade).filter(Grade.student_id == student_id, Grade.subject_id == subject_id).all()
+    if not grade_model:
+        raise AverageBySubjectForStudentNotFoundException(subject_id=subject_id, student_id=student_id,
+                                                          username=user.get('username'))
     return grade_model

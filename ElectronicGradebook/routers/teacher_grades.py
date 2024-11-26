@@ -13,7 +13,7 @@ from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
 from ..services.grade_service import create_grade
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades, \
-    validate_class_exist, validate_subject_exist, validate_grades_for_subject
+    validate_class_exist, validate_subject_exist, validate_grades_for_subject, validate_average_student_for_subject
 
 router = APIRouter(
     prefix="/teacher",
@@ -52,26 +52,14 @@ async def get_students_grades_for_subject(db: db_dependency, user: user_dependen
 @router.get("/grades/average/subject/{subject_id}", status_code=status.HTTP_200_OK)
 async def show_average_student_for_subject(db: db_dependency, user: user_dependency, subject_id: int = Path(gt=0),
                                            student_id: int = Query(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    grade_model = db.query(Grade).filter(Grade.student_id == student_id, Grade.subject_id == subject_id).all()
-    subject_model = db.query(Subject).filter(Subject.id == subject_id).first()
-    student_model = db.query(User).filter(User.id == student_id, User.role == 'student').first()
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
-    if student_model is None:
-        raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
-    if not grade_model:
-        raise AverageBySubjectForStudentNotFoundException(subject_id=subject_id, student_id=student_id,
-                                                          username=user.get('username'))
-    values = []
-    for grade in grade_model:
-        values.append(grade.grade)
-    average_grade = sum(values) / len(values)
-    average_grade_rounded = round(average_grade, 2)
-    return {'average_grade': average_grade_rounded}
+    verify_teacher_user(user)
+    validate_subject_exist(user,subject_id,db)
+    validate_user_id(student_id,db,user)
+    grade_model = validate_average_student_for_subject(subject_id,student_id,user,db)
+    grade_values=[grade.grade for grade in grade_model]
+    average = round(sum(grade_values) / len(grade_values), 2)
+    return {'average_grade': average}
+
 
 
 @router.get("/grades/average/class/{class_id}", status_code=status.HTTP_200_OK)
