@@ -4,10 +4,10 @@ from fastapi import Depends
 from ..routers.auth import get_db
 from fastapi import HTTPException
 from starlette import status
-from ..models import User,Class,Subject
+from ..models import User, Class, Subject, Grade
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
-    SubjectDeleteException
+    SubjectDeleteException, GradesNotFoundException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -66,3 +66,15 @@ def validate_related_class(class_id: int, user: dict, db: db_dependency):
     related_users = db.query(User).filter(User.class_id == class_id).all()
     if related_users:
         raise ClassDeleteException(class_id=class_id, table_name="users", username=user.get('username'))
+
+def validate_user_grades(student_id: int, user: dict, db: db_dependency):
+    grades = (
+        db.query(Grade)
+        .join(User, Grade.student_id == User.id)
+        .join(Subject, Grade.subject_id == Subject.id)
+        .filter(Grade.student_id == student_id)
+        .all()
+    )
+    if not grades:
+        raise GradesNotFoundException(student_id=student_id, username=user.get('username'))
+    return grades

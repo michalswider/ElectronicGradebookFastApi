@@ -1,0 +1,14 @@
+def map_grades_to_response(grades):
+    grouped_grades = {
+        subject_name: [
+            {
+                'id': grade.id,
+                'grade': grade.grade,
+                'date': grade.date,
+                'added_by': f"{grade.teacher.first_name} {grade.teacher.last_name}"
+            }
+            for grade in grades if grade.subject.name == subject_name
+        ]
+        for subject_name in {grade.subject.name for grade in grades}
+    }
+    return grouped_grades
