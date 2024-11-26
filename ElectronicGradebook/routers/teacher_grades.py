@@ -1,6 +1,6 @@
 from typing import Annotated
-from ..exception import UserIdNotFoundException, SubjectNotExistException, GradesNotFoundException, \
-    GradeEditNotExistException, GradeForSubjectNotExistException, AverageByClassNotFoundException, \
+from ..exception import UserIdNotFoundException, SubjectNotExistException, \
+    GradeEditNotExistException , AverageByClassNotFoundException, \
     AverageBySubjectForStudentNotFoundException, ClassNotExistException
 from fastapi import Path, HTTPException
 from fastapi import APIRouter, Depends, Query
