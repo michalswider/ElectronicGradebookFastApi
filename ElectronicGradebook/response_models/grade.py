@@ -27,3 +27,9 @@ def map_grades_to_students_response(grades):
             'added_by': f"{grade.teacher.first_name} {grade.teacher.last_name}",
         })
     return result
+
+def map_average_grades_by_class_response(class_model, average):
+    return {
+        'class': class_model,
+        'average_grade': average
+    }

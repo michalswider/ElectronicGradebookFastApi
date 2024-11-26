@@ -1,19 +1,20 @@
 from typing import Annotated
 from ..exception import UserIdNotFoundException, SubjectNotExistException, \
-    GradeEditNotExistException , AverageByClassNotFoundException, \
-    AverageBySubjectForStudentNotFoundException, ClassNotExistException
+    GradeEditNotExistException
 from fastapi import Path, HTTPException
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from starlette import status
-from ..models import Grade, Subject, User, Class
-from ..response_models.grade import map_grades_to_response, map_grades_to_students_response
+from ..models import Grade, Subject, User
+from ..response_models.grade import map_grades_to_response, map_grades_to_students_response, \
+    map_average_grades_by_class_response
 from ..routers.auth import get_db
 from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
 from ..services.grade_service import create_grade
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades, \
-    validate_class_exist, validate_subject_exist, validate_grades_for_subject, validate_average_student_for_subject
+    validate_class_exist, validate_subject_exist, validate_grades_for_subject, validate_average_student_for_subject, \
+    validate_average_by_class
 
 router = APIRouter(
     prefix="/teacher",
@@ -64,27 +65,14 @@ async def show_average_student_for_subject(db: db_dependency, user: user_depende
 
 @router.get("/grades/average/class/{class_id}", status_code=status.HTTP_200_OK)
 async def show_average_by_class(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    grades = db.query(Grade).join(User, Grade.student_id == User.id).join(Class, Class.id == User.class_id).filter(
-        Class.id == class_id).all()
-    class_model = db.query(Class).filter(Class.id == class_id).first()
-    if class_model is None:
-        raise ClassNotExistException(class_id=class_id, username=user.get('username'))
-    if not grades:
-        raise AverageByClassNotFoundException(class_id=class_id, username=user.get('username'))
-    values_of_grades = []
-    for grade in grades:
-        values_of_grades.append(grade.grade)
+    verify_teacher_user(user)
+    validate_class_exist(user,class_id,db)
+    grade_model = validate_average_by_class(class_id, user,db)
+    grade_values = [grade.grade for grade in grade_model]
+    class_model = grade_model[0].student.klasa.name
+    average = round(sum(grade_values) / len(grade_values), 2)
+    return map_average_grades_by_class_response(class_model,average)
 
-    average_of_grades = sum(values_of_grades) / len(values_of_grades)
-    rounded_average_of_grades = round(average_of_grades, 2)
-    return {
-        'class': grade.student.klasa.name,
-        'average_grade': rounded_average_of_grades
-    }
 
 
 @router.put("/grades/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
