@@ -1,11 +1,8 @@
 from typing import Annotated
-from ..exception import UserIdNotFoundException, SubjectNotExistException, \
-    GradeEditNotExistException
 from fastapi import Path, HTTPException
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from starlette import status
-from ..models import Grade, Subject, User
 from ..response_models.grade import map_grades_to_response, map_grades_to_students_response, \
     map_average_grades_by_class_response
 from ..routers.auth import get_db
