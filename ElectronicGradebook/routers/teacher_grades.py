@@ -11,10 +11,10 @@ from ..response_models.grade import map_grades_to_response, map_grades_to_studen
 from ..routers.auth import get_db
 from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
-from ..services.grade_service import create_grade
+from ..services.grade_service import create_grade, edit_grade
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades, \
     validate_class_exist, validate_subject_exist, validate_grades_for_subject, validate_average_student_for_subject, \
-    validate_average_by_class
+    validate_average_by_class, validate_grade_edit
 
 router = APIRouter(
     prefix="/teacher",
@@ -79,25 +79,11 @@ async def show_average_by_class(db: db_dependency, user: user_dependency, class_
 async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grade_request: EditGradeRequest,
                              student_id: int = Path(gt=0),
                              subject_id: int = Query(gt=0), grade_id: int = Query(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    grade_model = db.query(Grade).filter(Grade.student_id == student_id, Grade.subject_id == subject_id,
-                                         Grade.id == grade_id).first()
-    student_model = db.query(User).filter(User.id == student_id, User.role == 'student').first()
-    subject_model = db.query(Subject).filter(Subject.id == subject_id).first()
-    if student_model is None:
-        raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
-    if grade_model is None:
-        raise GradeEditNotExistException(student_id=student_id, grade_id=grade_id, subject_id=subject_id,
-                                         username=user.get('username'))
-    grade_model.grade = edit_grade_request.grade
-    grade_model.date = edit_grade_request.date
-    grade_model.added_by_id = user.get('id')
-    db.commit()
+    verify_teacher_user(user)
+    validate_user_id(student_id,db,user)
+    validate_subject_exist(user,subject_id,db)
+    grade_model = validate_grade_edit(subject_id,grade_id,student_id,user,db)
+    edit_grade(edit_grade_request,grade_model,user,db)
 
 
 @router.delete("/grades/{student_id}/{subject_id}/{grade_id}", status_code=status.HTTP_204_NO_CONTENT)

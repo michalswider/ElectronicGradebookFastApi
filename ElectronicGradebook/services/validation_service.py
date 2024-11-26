@@ -8,7 +8,7 @@ from ..models import User, Class, Subject, Grade
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
     SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
-    AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException
+    AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
@@ -102,3 +102,11 @@ def validate_average_by_class(class_id: int,user: dict, db: db_dependency):
     if not grades:
         raise AverageByClassNotFoundException(class_id=class_id, username=user.get('username'))
     return grades
+
+def validate_grade_edit(subject_id: int,grade_id: int,student_id: int,user: dict,db: db_dependency):
+    grade_model = db.query(Grade).filter(Grade.student_id == student_id, Grade.subject_id == subject_id,
+                                         Grade.id == grade_id).first()
+    if grade_model is None:
+        raise GradeEditNotExistException(student_id=student_id, grade_id=grade_id, subject_id=subject_id,
+                                         username=user.get('username'))
+    return grade_model
