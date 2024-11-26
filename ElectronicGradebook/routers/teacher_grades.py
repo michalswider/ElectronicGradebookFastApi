@@ -11,10 +11,10 @@ from ..response_models.grade import map_grades_to_response, map_grades_to_studen
 from ..routers.auth import get_db
 from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
-from ..services.grade_service import create_grade, edit_grade
+from ..services.grade_service import create_grade, edit_grade, delete_grades
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades, \
     validate_class_exist, validate_subject_exist, validate_grades_for_subject, validate_average_student_for_subject, \
-    validate_average_by_class, validate_grade_edit
+    validate_average_by_class, validate_grade_edit, validate_grade_delete
 
 router = APIRouter(
     prefix="/teacher",
@@ -90,20 +90,8 @@ async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grad
 async def delete_grade(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0),
                        subject_id: int = Path(gt=0),
                        grade_id: int = Path(gt=0)):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    grade_model = db.query(Grade).filter(Grade.student_id == student_id, Grade.id == grade_id,
-                                         Grade.subject_id == subject_id).first()
-    subject_model = db.query(Subject).filter(Subject.id == subject_id).first()
-    student_model = db.query(User).filter(User.id == student_id).first()
-    if student_model is None:
-        raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
-    if grade_model is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Grade with the specified student_id, subject_id, and grade_id not found')
-    db.delete(grade_model)
-    db.commit()
+    verify_teacher_user(user)
+    validate_user_id(student_id,db,user)
+    validate_subject_exist(user,subject_id,db)
+    grade_model = validate_grade_delete(subject_id,grade_id,student_id,db)
+    delete_grades(grade_model,db)

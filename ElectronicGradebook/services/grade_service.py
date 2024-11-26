@@ -20,3 +20,7 @@ def edit_grade(request: EditGradeRequest,grade_model: dict,user: dict ,db: db_de
     grade_model.date = request.date
     grade_model.added_by_id = user.get('id')
     db.commit()
+
+def delete_grades(grade_model:dict, db: db_dependency):
+    db.delete(grade_model)
+    db.commit()

@@ -110,3 +110,11 @@ def validate_grade_edit(subject_id: int,grade_id: int,student_id: int,user: dict
         raise GradeEditNotExistException(student_id=student_id, grade_id=grade_id, subject_id=subject_id,
                                          username=user.get('username'))
     return grade_model
+
+def validate_grade_delete(subject_id: int, grade_id: int,student_id: int,db: db_dependency):
+    grade_model = db.query(Grade).filter(Grade.student_id == student_id, Grade.id == grade_id,
+                                         Grade.subject_id == subject_id).first()
+    if grade_model is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Grade with the specified student_id, subject_id, and grade_id not found')
+    return grade_model
