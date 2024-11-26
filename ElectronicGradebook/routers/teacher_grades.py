@@ -25,6 +25,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 @router.post("/grades/add-grade", status_code=status.HTTP_201_CREATED)
 async def add_grade(db: db_dependency, user: user_dependency, add_grade_request: AddGradeRequest):
     verify_teacher_user(user)
+    validate_user_id(add_grade_request.student_id,db,user)
+    validate_subject_exist(user,add_grade_request.subject_id,db)
     create_grade(add_grade_request, user, db)
     return {"message": "Grade added successfully"}
 

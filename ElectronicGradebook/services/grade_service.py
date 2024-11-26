@@ -9,8 +9,6 @@ from ..services.validation_service import validate_user_id, validate_subject_exi
 db_dependency = Annotated[Session, Depends(get_db)]
 
 def create_grade(request: AddGradeRequest, user: dict, db: db_dependency):
-    validate_user_id(request.student_id,db,user)
-    validate_subject_exist(user,request.subject_id,db)
     grade_model = Grade(**request.dict(), added_by_id=user.get('id'))
     db.add(grade_model)
     db.commit()
