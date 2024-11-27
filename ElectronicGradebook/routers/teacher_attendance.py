@@ -2,7 +2,7 @@ from datetime import date
 from typing import Annotated
 from ..models import Attendance, User, Subject, Class
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
-from pydantic import BaseModel, Field
+from ..schemas.attendance import AddAttendanceRequest,EditAttendanceStatusRequest
 from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_db, get_current_user
@@ -18,17 +18,6 @@ router = APIRouter(
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
-
-
-class AddAttendanceRequest(BaseModel):
-    student_id: int = Field(gt=0)
-    subject_id: int = Field(gt=0)
-    class_date: date
-    status: str
-
-
-class EditAttendanceStatusRequest(BaseModel):
-    status: str
 
 
 @router.post("/add-attendance", status_code=status.HTTP_201_CREATED)
@@ -131,7 +120,8 @@ async def get_attendance_for_student_in_subject(db: db_dependency, user: user_de
     if student_model is None:
         raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
     if not attendance_model:
-        raise AttendanceForStudentInSubjectNotFoundException(student_id=student_id, subject_id=subject_id, username=user.get('username'))
+        raise AttendanceForStudentInSubjectNotFoundException(student_id=student_id, subject_id=subject_id,
+                                                             username=user.get('username'))
     result = []
     for attendance in attendance_model:
         result.append({
@@ -165,9 +155,10 @@ async def edit_attendance_status(db: db_dependency, user: user_dependency,
     if student_model is None:
         raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
     if attendance_model is None:
-        raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id, username= user.get('username'))
+        raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id,
+                                              username=user.get('username'))
     if edit_attendance_status_request.status not in ('present', 'absent', 'excused'):
-        raise InvalidStatusException(status=edit_attendance_status_request.status, username= user.get('username'))
+        raise InvalidStatusException(status=edit_attendance_status_request.status, username=user.get('username'))
     attendance_model.status = edit_attendance_status_request.status
     db.add(attendance_model)
     db.commit()
@@ -191,6 +182,7 @@ async def delete_attendance(db: db_dependency, user: user_dependency, student_id
     if subject_model is None:
         raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
     if attendance_model is None:
-        raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id, username=user.get('username'))
+        raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id,
+                                              username=user.get('username'))
     db.delete(attendance_model)
     db.commit()
