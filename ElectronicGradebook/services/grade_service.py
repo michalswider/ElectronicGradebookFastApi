@@ -4,12 +4,11 @@ from fastapi import Depends
 from ..models import Grade
 from ..routers.auth import get_db
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
-from ..services.validation_service import validate_user_id, validate_subject_exist
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
 def create_grade(request: AddGradeRequest, user: dict, db: db_dependency):
-    grade_model = Grade(**request.dict(), added_by_id=user.get('id'))
+    grade_model = Grade(**request.model_dump(), added_by_id=user.get('id'))
     db.add(grade_model)
     db.commit()
 

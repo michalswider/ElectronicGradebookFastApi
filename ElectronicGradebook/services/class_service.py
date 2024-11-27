@@ -9,7 +9,7 @@ from ..schemas.classes import CreateClassRequest
 db_dependency = Annotated[Session, Depends(get_db)]
 
 def add_class(request: CreateClassRequest, db):
-    class_model = Class(**request.dict())
+    class_model = Class(**request.model_dump())
     db.add(class_model)
     db.commit()
 

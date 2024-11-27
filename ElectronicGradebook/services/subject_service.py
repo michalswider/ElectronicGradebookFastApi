@@ -9,7 +9,7 @@ from ..routers.auth import get_db
 db_dependency = Annotated[Session, Depends(get_db)]
 
 def add_subject(request: CreateSubjectRequest, db: db_dependency):
-    subject_model = Subject(**request.dict())
+    subject_model = Subject(**request.model_dump())
     db.add(subject_model)
     db.commit()
 

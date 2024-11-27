@@ -45,7 +45,7 @@ async def add_attendance(db: db_dependency, user: user_dependency, add_attendanc
         raise SubjectNotExistException(subject_id=add_attendance_request.subject_id, username=user.get('username'))
     if add_attendance_request.status not in ('present', 'absent', 'excused'):
         raise InvalidStatusException(status=add_attendance_request.status, username=user.get('username'))
-    attendance_model = Attendance(**add_attendance_request.dict(), added_by_id=user.get('id'))
+    attendance_model = Attendance(**add_attendance_request.model_dump(), added_by_id=user.get('id'))
     db.add(attendance_model)
     db.commit()
 
