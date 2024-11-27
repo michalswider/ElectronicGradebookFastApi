@@ -3,13 +3,14 @@ from ElectronicGradebook.models import User, Grade, Attendance
 from ElectronicGradebook.routers.auth import bcrypt_context, get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends
+from ..schemas.user import CreateUserRequest,EditUserRequest
 from ..services.validation_service import validate_username_exist, validate_class_exist, validate_subject_exist, \
     validate_roles, validate_database_relation
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-def create_user(request: dict, db: db_dependency):
+def create_user(request: CreateUserRequest, db: db_dependency):
     user_model = User(
         first_name=request.first_name,
         last_name=request.last_name,
@@ -24,7 +25,7 @@ def create_user(request: dict, db: db_dependency):
     db.add(user_model)
     db.commit()
 
-def edit_users(request: dict, db: db_dependency, user_model, user: dict):
+def edit_users(request: EditUserRequest, db: db_dependency, user_model, user: dict):
     if request.first_name is not None:
         user_model.first_name = request.first_name
     if request.last_name is not None:
