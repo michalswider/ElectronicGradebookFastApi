@@ -79,5 +79,5 @@ async def edit_user(edit_user_request: EditUserRequest, user: user_dependency, d
 @router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(db: db_dependency, user: user_dependency, user_id: int = Path(gt=0)):
     verify_admin_user(user)
-    validate_user_id(user_id, db, user)
+    validate_user_id(user_id, db, user,role="all")
     delete_users(user_id, db, user)
