@@ -8,7 +8,8 @@ from ..models import User, Class, Subject, Grade
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
     SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
-    AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException
+    AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException, \
+    InvalidStatusException
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -142,3 +143,8 @@ def validate_grade_delete(subject_id: int, grade_id: int, student_id: int, db: d
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='Grade with the specified student_id, subject_id, and grade_id not found')
     return grade_model
+
+
+def validate_attendance_status(attendance_status: str, user: dict):
+    if attendance_status not in ('present', 'absent', 'excused'):
+        raise InvalidStatusException(status=attendance_status, username=user.get('username'))

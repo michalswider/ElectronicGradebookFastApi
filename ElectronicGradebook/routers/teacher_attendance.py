@@ -10,6 +10,9 @@ from ..exception import SubjectNotExistException, InvalidStatusException, \
     StudentAttendanceNotFoundException, ClassNotExistException, ClassAttendanceOnDateNotFoundException, \
     AttendanceForStudentInSubjectNotFoundException, UserIdNotFoundException, AttendanceNotFoundException, \
     AttendanceDataNotFoundException
+from ..services.attendance_service import create_attendance
+from ..services.validation_service import verify_teacher_user, validate_user_id, validate_subject_exist, \
+    validate_attendance_status
 
 router = APIRouter(
     prefix='/teacher',
@@ -22,21 +25,11 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @router.post("/add-attendance", status_code=status.HTTP_201_CREATED)
 async def add_attendance(db: db_dependency, user: user_dependency, add_attendance_request: AddAttendanceRequest):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    student_model = db.query(User).filter(User.id == add_attendance_request.student_id, User.role == 'student').first()
-    subject_model = db.query(Subject).filter(Subject.id == add_attendance_request.subject_id).first()
-    if student_model is None:
-        raise UserIdNotFoundException(user_id=add_attendance_request.student_id, username=user.get('username'))
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=add_attendance_request.subject_id, username=user.get('username'))
-    if add_attendance_request.status not in ('present', 'absent', 'excused'):
-        raise InvalidStatusException(status=add_attendance_request.status, username=user.get('username'))
-    attendance_model = Attendance(**add_attendance_request.model_dump(), added_by_id=user.get('id'))
-    db.add(attendance_model)
-    db.commit()
+    verify_teacher_user(user)
+    validate_user_id(add_attendance_request.student_id,db,user,role="student")
+    validate_subject_exist(user, add_attendance_request.subject_id, db)
+    validate_attendance_status(add_attendance_request.status, user)
+    create_attendance(add_attendance_request, db,user)
 
 
 @router.get("/show-student-attendance/{student_id}", status_code=status.HTTP_200_OK)
