@@ -41,7 +41,7 @@ async def show_student_attendance(db: db_dependency, user: user_dependency, stud
     return map_student_attendance_to_response(attendance_model)
 
 
-@router.get("/attendance/class/{class_id}/date")
+@router.get("/attendance/class/{class_id}/date", status_code=status.HTTP_200_OK)
 async def get_attendance_for_class_on_date(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0),
                                            date: date = Query()):
     attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Class,
@@ -77,7 +77,7 @@ async def get_attendance_for_class_on_date(db: db_dependency, user: user_depende
     return result
 
 
-@router.get("/attendance/subject/{subject_id}/student/{student_id}")
+@router.get("/attendance/subject/{subject_id}/student/{student_id}", status_code=status.HTTP_200_OK)
 async def get_attendance_for_student_in_subject(db: db_dependency, user: user_dependency, subject_id: int = Path(gt=0),
                                                 student_id: int = Path(gt=0)):
     if user is None:
