@@ -2,17 +2,18 @@ from datetime import date
 from typing import Annotated
 from ..models import Attendance, User, Subject, Class
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
+from ..response_models.attendance import map_student_attendance_to_response
 from ..schemas.attendance import AddAttendanceRequest,EditAttendanceStatusRequest
 from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_db, get_current_user
 from ..exception import SubjectNotExistException, InvalidStatusException, \
-    StudentAttendanceNotFoundException, ClassNotExistException, ClassAttendanceOnDateNotFoundException, \
+    ClassNotExistException, ClassAttendanceOnDateNotFoundException, \
     AttendanceForStudentInSubjectNotFoundException, UserIdNotFoundException, AttendanceNotFoundException, \
     AttendanceDataNotFoundException
 from ..services.attendance_service import create_attendance
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_subject_exist, \
-    validate_attendance_status
+    validate_attendance_status, validate_student_attendance
 
 router = APIRouter(
     prefix='/teacher',
@@ -34,30 +35,10 @@ async def add_attendance(db: db_dependency, user: user_dependency, add_attendanc
 
 @router.get("/show-student-attendance/{student_id}", status_code=status.HTTP_200_OK)
 async def show_student_attendance(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0)):
-    attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Subject,
-                                                                                              Attendance.subject_id == Subject.id).filter(
-        Attendance.student_id == student_id).all()
-    student_model = db.query(User).filter(User.id == student_id).first()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    if student_model is None:
-        raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
-    if not attendance_model:
-        raise StudentAttendanceNotFoundException(student_id=student_id, username=user.get('username'))
-    result = {}
-    for attendance in attendance_model:
-        attendance_subject = attendance.subject.name
-        if attendance_subject not in result:
-            result[attendance_subject] = []
-        result[attendance_subject].append({
-            'id': attendance.id,
-            'class_date': attendance.class_date,
-            'status': attendance.status,
-            'added_by': attendance.teacher.first_name + " " + attendance.teacher.last_name
-        })
-    return result
+    verify_teacher_user(user)
+    validate_user_id(student_id,db,user,role="student")
+    attendance_model = validate_student_attendance(student_id,db,user)
+    return map_student_attendance_to_response(attendance_model)
 
 
 @router.get("/attendance/class/{class_id}/date")

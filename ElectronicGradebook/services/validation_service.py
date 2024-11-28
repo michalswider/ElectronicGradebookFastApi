@@ -4,12 +4,12 @@ from fastapi import Depends
 from ..routers.auth import get_db
 from fastapi import HTTPException
 from starlette import status
-from ..models import User, Class, Subject, Grade
+from ..models import User, Class, Subject, Grade, Attendance
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
     SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
     AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException, \
-    InvalidStatusException
+    InvalidStatusException, StudentAttendanceNotFoundException
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -148,3 +148,12 @@ def validate_grade_delete(subject_id: int, grade_id: int, student_id: int, db: d
 def validate_attendance_status(attendance_status: str, user: dict):
     if attendance_status not in ('present', 'absent', 'excused'):
         raise InvalidStatusException(status=attendance_status, username=user.get('username'))
+
+
+def validate_student_attendance(student_id: int, db: db_dependency, user: dict):
+    attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Subject,
+                                                                                              Attendance.subject_id == Subject.id).filter(
+        Attendance.student_id == student_id).all()
+    if not attendance_model:
+        raise StudentAttendanceNotFoundException(student_id=student_id, username=user.get('username'))
+    return attendance_model
