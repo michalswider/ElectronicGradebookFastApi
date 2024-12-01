@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_db, get_current_user
 from ..exception import SubjectNotExistException, InvalidStatusException, \
-    ClassNotExistException, ClassAttendanceOnDateNotFoundException, \
     AttendanceForStudentInSubjectNotFoundException, UserIdNotFoundException, AttendanceNotFoundException, \
     AttendanceDataNotFoundException
 from ..services.attendance_service import create_attendance
