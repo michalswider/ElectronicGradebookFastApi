@@ -33,3 +33,14 @@ def map_attendance_for_class_on_date_to_response(attendance_model):
         })
 
     return result
+
+def map_attendance_for_student_in_subject(attendance_model):
+    result = []
+    for attendance in attendance_model:
+        result.append({
+            'id': attendance.id,
+            'class_date': attendance.class_date,
+            'status': attendance.status,
+            'added_by': attendance.teacher.first_name + " " + attendance.teacher.last_name
+        })
+    return result

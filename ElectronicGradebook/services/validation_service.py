@@ -10,7 +10,8 @@ from ..exception import UsernameAlreadyExistException, ClassNotExistException, S
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
     SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
     AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException, \
-    InvalidStatusException, StudentAttendanceNotFoundException, ClassAttendanceOnDateNotFoundException
+    InvalidStatusException, StudentAttendanceNotFoundException, ClassAttendanceOnDateNotFoundException, \
+    AttendanceForStudentInSubjectNotFoundException
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -159,10 +160,22 @@ def validate_student_attendance(student_id: int, db: db_dependency, user: dict):
         raise StudentAttendanceNotFoundException(student_id=student_id, username=user.get('username'))
     return attendance_model
 
-def validate_attendance_for_class_on_date(class_id: int, date: date,user: dict, db: db_dependency):
+
+def validate_attendance_for_class_on_date(class_id: int, date: date, user: dict, db: db_dependency):
     attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Class,
                                                                                               Class.id == User.class_id).filter(
         Attendance.class_date == date, Class.id == class_id).all()
     if not attendance_model:
         raise ClassAttendanceOnDateNotFoundException(class_id=class_id, date=date, username=user.get('username'))
+    return attendance_model
+
+
+def validate_attendance_for_student_in_subject(student_id: int, subject_id: int, user: dict, db: db_dependency):
+    attendance_model = db.query(Attendance).join(User, User.id == Attendance.student_id).join(Subject,
+                                                                                              Subject.id == Attendance.subject_id).filter(
+        Attendance.subject_id == subject_id, Attendance.student_id == student_id).all()
+
+    if not attendance_model:
+        raise AttendanceForStudentInSubjectNotFoundException(student_id=student_id, subject_id=subject_id,
+                                                             username=user.get('username'))
     return attendance_model
