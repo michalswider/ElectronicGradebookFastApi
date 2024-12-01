@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_db, get_current_user
 from ..exception import SubjectNotExistException, UserIdNotFoundException, AttendanceDataNotFoundException
-from ..services.attendance_service import create_attendance, edit_attendance
+from ..services.attendance_service import create_attendance, edit_attendance, delete_attendances
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_subject_exist, \
     validate_attendance_status, validate_student_attendance, validate_class_exist, \
     validate_attendance_for_class_on_date, validate_attendance_for_student_in_subject, validate_attendance_data
@@ -76,21 +76,8 @@ async def edit_attendance_status(db: db_dependency, user: user_dependency,
 async def delete_attendance(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0),
                             subject_id: int = Path(gt=0),
                             attendance_id: int = Path(gt=0)) -> None:
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    attendance_model = db.query(Attendance).filter(Attendance.student_id == student_id,
-                                                   Attendance.subject_id == subject_id,
-                                                   Attendance.id == attendance_id).first()
-    subject_model = db.query(Subject).filter(Subject.id == subject_id).first()
-    student_model = db.query(User).filter(User.id == student_id, User.role == 'student').first()
-    if student_model is None:
-        raise UserIdNotFoundException(user_id=student_id, username=user.get('username'))
-    if subject_model is None:
-        raise SubjectNotExistException(subject_id=subject_id, username=user.get('username'))
-    if attendance_model is None:
-        raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id,
-                                              username=user.get('username'))
-    db.delete(attendance_model)
-    db.commit()
+    verify_teacher_user(user)
+    validate_user_id(student_id,db,user,role="student")
+    validate_subject_exist(user,subject_id,db)
+    attendance_model = validate_attendance_data(attendance_id,student_id,subject_id,user,db)
+    delete_attendances(attendance_model,db)

@@ -16,3 +16,7 @@ def edit_attendance(attendance_model: dict,request: EditAttendanceStatusRequest,
     attendance_model.status = request.status
     db.add(attendance_model)
     db.commit()
+
+def delete_attendances(attendance_model:dict,db: db_dependency):
+    db.delete(attendance_model)
+    db.commit()
