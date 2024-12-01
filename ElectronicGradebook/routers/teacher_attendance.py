@@ -1,6 +1,5 @@
 from datetime import date
 from typing import Annotated
-from ..models import Attendance, User, Subject, Class
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from ..response_models.attendance import map_student_attendance_to_response, \
     map_attendance_for_class_on_date_to_response, map_attendance_for_student_in_subject
@@ -8,7 +7,6 @@ from ..schemas.attendance import AddAttendanceRequest,EditAttendanceStatusReques
 from sqlalchemy.orm import Session
 from starlette import status
 from ..routers.auth import get_db, get_current_user
-from ..exception import SubjectNotExistException, UserIdNotFoundException, AttendanceDataNotFoundException
 from ..services.attendance_service import create_attendance, edit_attendance, delete_attendances
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_subject_exist, \
     validate_attendance_status, validate_student_attendance, validate_class_exist, \
