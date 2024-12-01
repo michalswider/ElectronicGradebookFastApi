@@ -16,17 +16,15 @@ client = TestClient(app)
 def test_show_profile_detail_without_class(test_student):
     response = client.get('student/profile')
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == [
-        {'first_name': 'Johny', 'last_name': 'Bravo', 'username': 'j_bravo', 'date_of_birth': '2024-08-18',
-         'class': 'No class assigned', 'role': 'student'}]
+    assert response.json() == {'first_name': 'Johny', 'last_name': 'Bravo', 'username': 'j_bravo', 'date_of_birth': '2024-08-18',
+         'class': 'No class assigned', 'role': 'student'}
 
 
 def test_show_profile_detail_with_class(test_student_with_class):
     response = client.get('student/profile')
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == [
-        {'first_name': 'Johny', 'last_name': 'Bravo', 'username': 'j_bravo', 'date_of_birth': '2024-08-18',
-         'class': '1A', 'role': 'student'}]
+    assert response.json() == {'first_name': 'Johny', 'last_name': 'Bravo', 'username': 'j_bravo', 'date_of_birth': '2024-08-18',
+         'class': '1A', 'role': 'student'}
 
 
 def test_reset_password(test_student):

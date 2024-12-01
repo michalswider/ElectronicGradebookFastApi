@@ -1,12 +1,13 @@
 from typing import Annotated
 from ..models import Grade, Subject, Attendance
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from ..response_models.student import map_student_profile_to_response
+from ..schemas.students import UserVerification
 from sqlalchemy.orm import Session
 from starlette import status
-
-from ..models import User, Class
+from ..models import User
 from ..routers.auth import get_db, get_current_user, bcrypt_context
+from ..services.validation_service import verify_student_user
 
 router = APIRouter(
     prefix='/student',
@@ -17,28 +18,11 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-class UserVerification(BaseModel):
-    old_password: str
-    new_password: str = Field(min_length=6)
-
-
 @router.get("/profile", status_code=status.HTTP_200_OK)
 async def show_profile_detail(user: user_dependency, db: db_dependency):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'student'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    student_model = db.query(User).filter(User.id == user.get('id')).all()
-    result = []
-    for detail in student_model:
-        result.append({
-            "first_name": detail.first_name,
-            "last_name": detail.last_name,
-            'username': detail.username,
-            "date_of_birth": detail.date_of_birth,
-            "class": detail.klasa.name if detail.klasa else "No class assigned",
-            "role": detail.role
-        })
+    verify_student_user(user)
+    student = db.query(User).filter(User.id == user.get('id')).first()
+    result = map_student_profile_to_response(student)
     return result
 
 
