@@ -132,13 +132,6 @@ class AttendanceForStudentInSubjectNotFoundException(ApplicationException):
         self.username = username
 
 
-class AttendanceNotFoundException(ApplicationException):
-    def __init__(self, attendance_id: int, username: str):
-        super().__init__(f'Attendance with id: {attendance_id} not found.', f'User: {username}')
-        self.attendance_id = attendance_id
-        self.username = username
-
-
 class AttendanceDataNotFoundException(ApplicationException):
     def __init__(self, attendance_id: int, subject_id: int, student_id: int, username: str):
         super().__init__(

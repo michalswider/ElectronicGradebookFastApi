@@ -11,7 +11,7 @@ from ..exception import UsernameAlreadyExistException, ClassNotExistException, S
     SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
     AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException, \
     InvalidStatusException, StudentAttendanceNotFoundException, ClassAttendanceOnDateNotFoundException, \
-    AttendanceForStudentInSubjectNotFoundException
+    AttendanceForStudentInSubjectNotFoundException, AttendanceDataNotFoundException
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -178,4 +178,13 @@ def validate_attendance_for_student_in_subject(student_id: int, subject_id: int,
     if not attendance_model:
         raise AttendanceForStudentInSubjectNotFoundException(student_id=student_id, subject_id=subject_id,
                                                              username=user.get('username'))
+    return attendance_model
+
+def validate_attendance_data(attendance_id: int,student_id: int,subject_id: int,user: dict,db: db_dependency):
+    attendance_model = db.query(Attendance).filter(Attendance.id == attendance_id,
+                                                   Attendance.student_id == student_id,
+                                                   Attendance.subject_id == subject_id).first()
+    if attendance_model is None:
+        raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id,
+                                              username=user.get('username'))
     return attendance_model
