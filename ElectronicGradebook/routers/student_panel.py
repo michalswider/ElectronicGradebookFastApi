@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from ..models import User
 from ..routers.auth import get_db, get_current_user, bcrypt_context
-from ..services.validation_service import verify_student_user
+from ..services.student_service import edit_password
+from ..services.validation_service import verify_student_user, validate_password_reset
 
 router = APIRouter(
     prefix='/student',
@@ -28,14 +29,9 @@ async def show_profile_detail(user: user_dependency, db: db_dependency):
 
 @router.put("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
 async def reset_password(user: user_dependency, db: db_dependency, user_verification: UserVerification):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    user_model = db.query(User).filter(User.id == user.get('id')).first()
-    if not bcrypt_context.verify(user_verification.old_password, user_model.hashed_password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Error on password change')
-    user_model.hashed_password = bcrypt_context.hash(user_verification.new_password)
-    db.add(user_model)
-    db.commit()
+    verify_student_user(user)
+    student = validate_password_reset(user_verification,user.get("id"),db)
+    edit_password(user_verification,student,db)
 
 
 @router.get("/grades", status_code=status.HTTP_200_OK)

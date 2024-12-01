@@ -6,12 +6,14 @@ from fastapi import HTTPException
 from starlette import status
 from datetime import date
 from ..models import User, Class, Subject, Grade, Attendance
+from ..routers.auth import bcrypt_context
 from ..exception import UsernameAlreadyExistException, ClassNotExistException, SubjectNotExistException, \
     InvalidRoleException, UsernameNotFoundException, UserDeleteException, UserIdNotFoundException, ClassDeleteException, \
     SubjectDeleteException, GradesNotFoundException, GradeForSubjectNotExistException, \
     AverageBySubjectForStudentNotFoundException, AverageByClassNotFoundException, GradeEditNotExistException, \
     InvalidStatusException, StudentAttendanceNotFoundException, ClassAttendanceOnDateNotFoundException, \
     AttendanceForStudentInSubjectNotFoundException, AttendanceDataNotFoundException
+from ..schemas.students import UserVerification
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -193,3 +195,9 @@ def validate_attendance_data(attendance_id: int,student_id: int,subject_id: int,
         raise AttendanceDataNotFoundException(attendance_id=attendance_id, subject_id=subject_id, student_id=student_id,
                                               username=user.get('username'))
     return attendance_model
+
+def validate_password_reset(request: UserVerification,student_id: int, db: db_dependency):
+    user_model = db.query(User).filter(User.id == student_id).first()
+    if not bcrypt_context.verify(request.old_password, user_model.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Error on password change')
+    return user_model
