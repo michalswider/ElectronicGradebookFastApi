@@ -2,7 +2,8 @@ from datetime import date
 from typing import Annotated
 from ..models import Attendance, User, Subject, Class
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
-from ..response_models.attendance import map_student_attendance_to_response
+from ..response_models.attendance import map_student_attendance_to_response, \
+    map_attendance_for_class_on_date_to_response
 from ..schemas.attendance import AddAttendanceRequest,EditAttendanceStatusRequest
 from sqlalchemy.orm import Session
 from starlette import status
@@ -13,7 +14,7 @@ from ..exception import SubjectNotExistException, InvalidStatusException, \
     AttendanceDataNotFoundException
 from ..services.attendance_service import create_attendance
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_subject_exist, \
-    validate_attendance_status, validate_student_attendance
+    validate_attendance_status, validate_student_attendance, validate_class_exist, validate_attendance_for_class_on_date
 
 router = APIRouter(
     prefix='/teacher',
@@ -44,37 +45,10 @@ async def show_student_attendance(db: db_dependency, user: user_dependency, stud
 @router.get("/attendance/class/{class_id}/date", status_code=status.HTTP_200_OK)
 async def get_attendance_for_class_on_date(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0),
                                            date: date = Query()):
-    attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Class,
-                                                                                              Class.id == User.class_id).filter(
-        Attendance.class_date == date, Class.id == class_id).all()
-    class_model = db.query(Class).filter(Class.id == class_id).first()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('admin', 'teacher'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    if class_model is None:
-        raise ClassNotExistException(class_id=class_id, username=user.get('username'))
-    if not attendance_model:
-        raise ClassAttendanceOnDateNotFoundException(class_id=class_id, date=date, username=user.get('username'))
-    result = {}
-    for attendance in attendance_model:
-        attendance_class = attendance.student.klasa.name
-        attendance_subject = attendance.subject.name
-        attendance_student = f"{attendance.student.first_name} {attendance.student.last_name}"
-
-        if attendance_class not in result:
-            result[attendance_class] = {}
-        if attendance_subject not in result[attendance_class]:
-            result[attendance_class][attendance_subject] = {}
-        if attendance_student not in result[attendance_class][attendance_subject]:
-            result[attendance_class][attendance_subject][attendance_student] = []
-
-        result[attendance_class][attendance_subject][attendance_student].append({
-            'class_date': attendance.class_date,
-            'status': attendance.status,
-            'added_by': attendance.teacher.first_name + " " + attendance.teacher.last_name
-        })
-    return result
+    verify_teacher_user(user)
+    validate_class_exist(user,class_id,db)
+    attendance_model = validate_attendance_for_class_on_date(class_id,date,user,db)
+    return map_attendance_for_class_on_date_to_response(attendance_model)
 
 
 @router.get("/attendance/subject/{subject_id}/student/{student_id}", status_code=status.HTTP_200_OK)
