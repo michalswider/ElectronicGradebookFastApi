@@ -1,14 +1,14 @@
 from typing import Annotated
 from ..models import Grade, Subject, Attendance
 from fastapi import APIRouter, Depends, HTTPException
-from ..response_models.student import map_student_profile_to_response
+from ..response_models.student import map_student_profile_to_response, map_student_grade_to_response
 from ..schemas.students import UserVerification
 from sqlalchemy.orm import Session
 from starlette import status
 from ..models import User
 from ..routers.auth import get_db, get_current_user, bcrypt_context
 from ..services.student_service import edit_password
-from ..services.validation_service import verify_student_user, validate_password_reset
+from ..services.validation_service import verify_student_user, validate_password_reset, validate_user_grades
 
 router = APIRouter(
     prefix='/student',
@@ -36,30 +36,9 @@ async def reset_password(user: user_dependency, db: db_dependency, user_verifica
 
 @router.get("/grades", status_code=status.HTTP_200_OK)
 async def show_grades(user: user_dependency, db: db_dependency):
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('student', 'admin'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    grades_model = (
-        db.query(Grade)
-        .join(User, Grade.student_id == User.id)
-        .join(Subject, Grade.subject_id == Subject.id)
-        .filter(Grade.student_id == user.get('id'))
-        .all()
-    )
-    if not grades_model:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not found')
-    result = {}
-    for grade in grades_model:
-        subject_name = grade.subject.name
-        if subject_name not in result:
-            result[subject_name] = []
-        result[subject_name].append({
-            'grade': grade.grade,
-            'date': grade.date,
-            'added_by': grade.teacher.first_name + " " + grade.teacher.last_name
-        })
-    return result
+    verify_student_user(user)
+    grades = validate_user_grades(user.get('id'), user, db,role="student")
+    return map_student_grade_to_response(grades)
 
 
 @router.get("/attendance", status_code=status.HTTP_200_OK)

@@ -97,7 +97,7 @@ def validate_related_class(class_id: int, user: dict, db: db_dependency):
         raise ClassDeleteException(class_id=class_id, table_name="users", username=user.get('username'))
 
 
-def validate_user_grades(student_id: int, user: dict, db: db_dependency):
+def validate_user_grades(student_id: int, user: dict, db: db_dependency,role: str):
     grades = (
         db.query(Grade)
         .join(User, Grade.student_id == User.id)
@@ -105,8 +105,12 @@ def validate_user_grades(student_id: int, user: dict, db: db_dependency):
         .filter(Grade.student_id == student_id)
         .all()
     )
+
     if not grades:
-        raise GradesNotFoundException(student_id=student_id, username=user.get('username'))
+        if role in ['admin', 'teacher']:
+            raise GradesNotFoundException(student_id=student_id, username=user.get('username'))
+        elif role == 'student':
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not found')
     return grades
 
 

@@ -35,7 +35,7 @@ async def add_grade(db: db_dependency, user: user_dependency, add_grade_request:
 async def show_student_grades(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0)):
     verify_teacher_user(user)
     validate_user_id(student_id,db,user,role="student")
-    grades = validate_user_grades(student_id,user,db)
+    grades = validate_user_grades(student_id,user,db,role="teacher")
     return map_grades_to_response(grades)
 
 
