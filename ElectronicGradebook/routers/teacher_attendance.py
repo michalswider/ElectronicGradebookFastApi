@@ -34,7 +34,7 @@ async def add_attendance(db: db_dependency, user: user_dependency, add_attendanc
 async def show_student_attendance(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0)):
     verify_teacher_user(user)
     validate_user_id(student_id,db,user,role="student")
-    attendance_model = validate_student_attendance(student_id,db,user)
+    attendance_model = validate_student_attendance(student_id,db,user,role="teacher")
     return map_student_attendance_to_response(attendance_model)
 
 

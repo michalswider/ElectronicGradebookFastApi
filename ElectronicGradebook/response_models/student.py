@@ -23,3 +23,19 @@ def map_student_grade_to_response(grades):
         })
 
     return student_grades
+
+
+def map_student_attendance_to_response(attendances):
+    attendance_model = {}
+    for attendance in attendances:
+        subject_name = attendance.subject.name
+        teacher = attendance.teacher
+        added_by = f"{teacher.first_name} {teacher.last_name}"
+
+        attendance_model.setdefault(subject_name, []).append({
+            'class_date': attendance.class_date,
+            'status': attendance.status,
+            'added_by': added_by
+        })
+
+    return attendance_model

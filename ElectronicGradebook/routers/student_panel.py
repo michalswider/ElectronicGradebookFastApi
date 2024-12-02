@@ -1,14 +1,14 @@
 from typing import Annotated
-from ..models import Grade, Subject, Attendance
 from fastapi import APIRouter, Depends, HTTPException
-from ..response_models.student import map_student_profile_to_response, map_student_grade_to_response
+from ..response_models.student import map_student_profile_to_response, map_student_grade_to_response,map_student_attendance_to_response
 from ..schemas.students import UserVerification
 from sqlalchemy.orm import Session
 from starlette import status
 from ..models import User
-from ..routers.auth import get_db, get_current_user, bcrypt_context
+from ..routers.auth import get_db, get_current_user
 from ..services.student_service import edit_password
-from ..services.validation_service import verify_student_user, validate_password_reset, validate_user_grades
+from ..services.validation_service import verify_student_user, validate_password_reset, validate_user_grades, \
+    validate_student_attendance
 
 router = APIRouter(
     prefix='/student',
@@ -43,23 +43,6 @@ async def show_grades(user: user_dependency, db: db_dependency):
 
 @router.get("/attendance", status_code=status.HTTP_200_OK)
 async def show_attendance(user: user_dependency, db: db_dependency):
-    attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Subject,
-                                                                                              Attendance.subject_id == Subject.id).filter(
-        Attendance.student_id == user.get('id')).all()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Authorization failed')
-    if user.get('role') not in ('student', 'admin'):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Permission Denied')
-    if not attendance_model:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not found')
-    result = {}
-    for attendance in attendance_model:
-        attendance_subject = attendance.subject.name
-        if attendance_subject not in result:
-            result[attendance_subject] = []
-        result[attendance_subject].append({
-            'class_date': attendance.class_date,
-            'status': attendance.status,
-            'added_by': attendance.teacher.first_name + " " + attendance.teacher.last_name
-        })
-    return result
+    verify_student_user(user)
+    attendance_model = validate_student_attendance(user.get("id"), db, user, role="student")
+    return map_student_attendance_to_response(attendance_model)

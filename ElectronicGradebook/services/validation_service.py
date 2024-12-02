@@ -163,12 +163,15 @@ def validate_attendance_status(attendance_status: str, user: dict):
         raise InvalidStatusException(status=attendance_status, username=user.get('username'))
 
 
-def validate_student_attendance(student_id: int, db: db_dependency, user: dict):
+def validate_student_attendance(student_id: int, db: db_dependency, user: dict, role:str):
     attendance_model = db.query(Attendance).join(User, Attendance.student_id == User.id).join(Subject,
                                                                                               Attendance.subject_id == Subject.id).filter(
         Attendance.student_id == student_id).all()
     if not attendance_model:
-        raise StudentAttendanceNotFoundException(student_id=student_id, username=user.get('username'))
+        if role in ['admin', 'teacher']:
+            raise StudentAttendanceNotFoundException(student_id=student_id, username=user.get('username'))
+        elif role == 'student':
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not found')
     return attendance_model
 
 
