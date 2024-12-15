@@ -19,6 +19,6 @@ def edit_classes(request: CreateClassRequest, class_id: int, db: db_dependency):
     db.commit()
 
 def delete_classes(class_id: int,user: dict, db: db_dependency):
-    validate_related_class(class_id, user, db)
+    validate_related_class(class_id, user, db,table_name="users")
     db.query(Class).filter(Class.id == class_id).delete()
     db.commit()

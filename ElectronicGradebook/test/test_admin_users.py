@@ -97,7 +97,7 @@ def test_add_user_username_exist(test_student):
     }
     response = client.post("admin/add-user", json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': "Username: 'j_bravo' already exist."}
+    assert response.json() == {'detail': 'Username: j_bravo already exist.'}
 
 
 def test_add_student_class_not_exist():
@@ -112,7 +112,7 @@ def test_add_student_class_not_exist():
 
     }
     response = client.post("admin/add-user", json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
@@ -127,7 +127,7 @@ def test_add_teacher_subject_not_exist():
         'role': 'teacher'
     }
     response = client.post("admin/add-user", json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -233,7 +233,7 @@ def test_edit_user_username_already_exist(test_student, test_teacher):
     }
     response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'detail': "Username: 'a_kowalska' already exist."}
+    assert response.json() == {'detail': 'Username: a_kowalska already exist.'}
 
 
 def test_edit_class_not_exist(test_student):
@@ -241,7 +241,7 @@ def test_edit_class_not_exist(test_student):
         'class_id': 999
     }
     response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
@@ -250,7 +250,7 @@ def test_edit_subject_not_exist(test_teacher):
         'subject_id': 999
     }
     response = client.put('admin/edit-user/?username=a_kowalska', json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -273,27 +273,27 @@ def test_delete_user(test_student):
 
 def test_delete_user_related_grades_error(test_grade):
     response = client.delete('admin/delete-user/1')
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 1 cannot be deleted because it is associated with table: grades.'}
 
 
 def test_delete_user_related_attendance_error(test_attendance):
     response = client.delete('admin/delete-user/1')
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 1 cannot be deleted because it is associated with table: attendance.'}
 
 
 def test_delete_teacher_related_grades_error(test_grade):
     response = client.delete('admin/delete-user/2')
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 2 cannot be deleted because it is associated with table: grades.'}
 
 
 def test_delete_teacher_related_attendance_error(test_attendance):
     response = client.delete('admin/delete-user/2')
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 2 cannot be deleted because it is associated with table: attendance.'}

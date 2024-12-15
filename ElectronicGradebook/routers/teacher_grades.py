@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import Path, HTTPException
+from fastapi import Path
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from starlette import status
@@ -92,5 +92,5 @@ async def delete_grade(db: db_dependency, user: user_dependency, student_id: int
     verify_teacher_user(user)
     validate_user_id(student_id,db,user, role="student")
     validate_subject_exist(user,subject_id,db)
-    grade_model = validate_grade_delete(subject_id,grade_id,student_id,db)
+    grade_model = validate_grade_delete(subject_id,grade_id,student_id,user,db)
     delete_grades(grade_model,db)

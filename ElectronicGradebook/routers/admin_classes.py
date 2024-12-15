@@ -1,6 +1,6 @@
 from typing import Annotated
 from ..models import Class
-from fastapi import APIRouter, Depends, Path, HTTPException
+from fastapi import APIRouter, Depends, Path
 from ..schemas.classes import CreateClassRequest
 from sqlalchemy.orm import Session
 from starlette import status

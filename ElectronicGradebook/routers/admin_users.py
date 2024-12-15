@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, HTTPException, Query
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 from starlette import status
 from ..models import User

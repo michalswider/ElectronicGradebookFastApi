@@ -50,7 +50,7 @@ def test_add_attendance_subject_not_exist(test_attendance):
         'status': 'absent'
     }
     response = client.post('/teacher/add-attendance', json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -94,7 +94,7 @@ def test_get_attendance_for_class_on_date(test_attendance):
 
 def test_get_attendance_for_class_on_date_class_not_exist():
     response = client.get('teacher/attendance/class/999/date?date=2024-09-04')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
@@ -112,7 +112,7 @@ def test_get_attendance_for_student_in_subject(test_attendance):
 
 def test_get_attendance_for_student_in_subject_subject_not_exist():
     response = client.get('teacher/attendance/subject/999/student/1')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -140,7 +140,7 @@ def test_edit_attendance_status(test_attendance):
 def test_edit_attendance_status_subject_not_exist(test_attendance):
     request_data = {'status': 'absent'}
     response = client.put('teacher/edit-attendance/1/999/1', json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -181,7 +181,7 @@ def test_delete_attendance_user_id_not_found(test_attendance):
 
 def test_delete_attendance_subject_not_exist(test_attendance):
     response = client.delete('teacher/delete-attendance/1/999/1')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 

@@ -52,7 +52,7 @@ def test_add_grade_subject_not_exist(test_student):
         'date': '2024-09-18'
     }
     response = client.post('teacher/grades/add-grade', json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -83,13 +83,13 @@ def test_get_students_grades_for_subject(test_grade):
 
 def test_get_students_grades_for_subject_class_not_exist():
     response = client.get('teacher/grades/class/999/subject/1')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
 def test_get_students_grades_for_subject_not_exist(test_class):
     response = client.get('teacher/grades/class/1/subject/999')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -107,7 +107,7 @@ def test_show_average_student_for_subject(test_grade):
 
 def test_show_average_student_for_subject_not_exist():
     response = client.get('teacher/grades/average/subject/999?student_id=1')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -131,7 +131,7 @@ def test_show_average_by_class(test_grade):
 
 def test_show_average_by_class_not_exist():
     response = client.get('teacher/grades/average/class/999')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
@@ -170,7 +170,7 @@ def test_edit_student_grade_subject_not_exist(test_student):
         'date': '2024-09-20'
     }
     response = client.put('teacher/grades/1?subject_id=999&grade_id=1', json=request_data)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
@@ -200,7 +200,7 @@ def test_delete_grade_user_id_not_found():
 
 def test_delete_grade_subject_not_exist(test_student):
     response = client.delete('teacher/grades/1/999/1')
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 

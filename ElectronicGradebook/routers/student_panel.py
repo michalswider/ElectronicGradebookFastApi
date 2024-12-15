@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from ..response_models.student import map_student_profile_to_response, map_student_grade_to_response,map_student_attendance_to_response
 from ..schemas.students import UserVerification
 from sqlalchemy.orm import Session

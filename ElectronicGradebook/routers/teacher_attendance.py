@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, HTTPException, Query
+from fastapi import APIRouter, Depends, Path, Query
 from ..response_models.attendance import map_student_attendance_to_response, \
     map_attendance_for_class_on_date_to_response, map_attendance_for_student_in_subject
 from ..schemas.attendance import AddAttendanceRequest,EditAttendanceStatusRequest
