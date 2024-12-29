@@ -2,10 +2,11 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 from fastapi import FastAPI, Depends
 from .handlers import setup_exception_handlers
+from .middleware.authentication_middleware import JWTMiddleware
 from .models import Base, User
 from .database import engine
 from .routers import admin_users, admin_subjects, admin_classes, teacher_grades, teacher_attendance, auth, student_panel
-from .routers.auth import get_db, bcrypt_context
+from .routers.auth import get_db, bcrypt_context, SECRET_KEY, ALGORITHM
 from sqlalchemy.orm import Session
 
 Base.metadata.create_all(bind=engine)
@@ -35,7 +36,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 setup_exception_handlers(app)
-
+app.add_middleware(JWTMiddleware, secret_key=SECRET_KEY, algorithm=ALGORITHM)
 app.include_router(admin_users.router)
 app.include_router(admin_subjects.router)
 app.include_router(admin_classes.router)
@@ -43,4 +44,3 @@ app.include_router(teacher_grades.router)
 app.include_router(teacher_attendance.router)
 app.include_router(student_panel.router)
 app.include_router(auth.router)
-

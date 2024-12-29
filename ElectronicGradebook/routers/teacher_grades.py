@@ -1,12 +1,10 @@
 from typing import Annotated
-from fastapi import Path
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request, Path
 from sqlalchemy.orm import Session
 from starlette import status
 from ..response_models.grade import map_grades_to_response, map_grades_to_students_response, \
     map_average_grades_by_class_response
 from ..routers.auth import get_db
-from ..routers.auth import get_current_user
 from ..schemas.grades import AddGradeRequest, EditGradeRequest
 from ..services.grade_service import create_grade, edit_grade, delete_grades
 from ..services.validation_service import verify_teacher_user, validate_user_id, validate_user_grades, \
@@ -19,11 +17,11 @@ router = APIRouter(
 )
 
 db_dependency = Annotated[Session, Depends(get_db)]
-user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/grades/add-grade", status_code=status.HTTP_201_CREATED)
-async def add_grade(db: db_dependency, user: user_dependency, add_grade_request: AddGradeRequest):
+async def add_grade(request: Request, db: db_dependency, add_grade_request: AddGradeRequest):
+    user = request.state.user
     verify_teacher_user(user)
     validate_user_id(add_grade_request.student_id,db,user,role="student")
     validate_subject_exist(user,add_grade_request.subject_id,db)
@@ -32,7 +30,8 @@ async def add_grade(db: db_dependency, user: user_dependency, add_grade_request:
 
 
 @router.get("/grades/{student_id}", status_code=status.HTTP_200_OK)
-async def show_student_grades(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0)):
+async def show_student_grades(request: Request, db: db_dependency, student_id: int = Path(gt=0)):
+    user = request.state.user
     verify_teacher_user(user)
     validate_user_id(student_id,db,user,role="student")
     grades = validate_user_grades(student_id,user,db,role="teacher")
@@ -40,8 +39,9 @@ async def show_student_grades(db: db_dependency, user: user_dependency, student_
 
 
 @router.get("/grades/class/{class_id}/subject/{subject_id}", status_code=status.HTTP_200_OK)
-async def get_students_grades_for_subject(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0),
+async def get_students_grades_for_subject(request: Request, db: db_dependency, class_id: int = Path(gt=0),
                                           subject_id: int = Path(gt=0)):
+    user = request.state.user
     verify_teacher_user(user)
     validate_class_exist(user,class_id,db)
     validate_subject_exist(user, subject_id, db)
@@ -50,8 +50,9 @@ async def get_students_grades_for_subject(db: db_dependency, user: user_dependen
 
 
 @router.get("/grades/average/subject/{subject_id}", status_code=status.HTTP_200_OK)
-async def show_average_student_for_subject(db: db_dependency, user: user_dependency, subject_id: int = Path(gt=0),
+async def show_average_student_for_subject(request: Request, db: db_dependency, subject_id: int = Path(gt=0),
                                            student_id: int = Query(gt=0)):
+    user = request.state.user
     verify_teacher_user(user)
     validate_subject_exist(user,subject_id,db)
     validate_user_id(student_id,db,user,role="student")
@@ -63,7 +64,8 @@ async def show_average_student_for_subject(db: db_dependency, user: user_depende
 
 
 @router.get("/grades/average/class/{class_id}", status_code=status.HTTP_200_OK)
-async def show_average_by_class(db: db_dependency, user: user_dependency, class_id: int = Path(gt=0)):
+async def show_average_by_class(request: Request, db: db_dependency, class_id: int = Path(gt=0)):
+    user = request.state.user
     verify_teacher_user(user)
     validate_class_exist(user,class_id,db)
     grade_model = validate_average_by_class(class_id, user,db)
@@ -75,9 +77,10 @@ async def show_average_by_class(db: db_dependency, user: user_dependency, class_
 
 
 @router.put("/grades/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grade_request: EditGradeRequest,
+async def edit_student_grade(request: Request, db: db_dependency, edit_grade_request: EditGradeRequest,
                              student_id: int = Path(gt=0),
                              subject_id: int = Query(gt=0), grade_id: int = Query(gt=0)):
+    user = request.state.user
     verify_teacher_user(user)
     validate_user_id(student_id,db,user,role="student")
     validate_subject_exist(user,subject_id,db)
@@ -86,9 +89,10 @@ async def edit_student_grade(db: db_dependency, user: user_dependency, edit_grad
 
 
 @router.delete("/grades/{student_id}/{subject_id}/{grade_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_grade(db: db_dependency, user: user_dependency, student_id: int = Path(gt=0),
+async def delete_grade(request: Request, db: db_dependency, student_id: int = Path(gt=0),
                        subject_id: int = Path(gt=0),
                        grade_id: int = Path(gt=0)):
+    user = request.state.user
     verify_teacher_user(user)
     validate_user_id(student_id,db,user, role="student")
     validate_subject_exist(user,subject_id,db)

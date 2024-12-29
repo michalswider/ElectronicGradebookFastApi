@@ -1,19 +1,15 @@
-from typing import Annotated
-from fastapi import Depends
 from fastapi.testclient import TestClient
 from starlette import status
-from ..routers.auth import get_db, get_current_user
+from ..routers.auth import get_db
 from ..main import app
 from .utils import *
 
 app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[get_current_user] = override_get_current_user
-user_dependency = Annotated[dict, Depends(get_current_user)]
 
 client = TestClient(app)
 
 
-def test_add_student(test_student):
+def test_add_student(token, test_student):
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
@@ -22,7 +18,7 @@ def test_add_student(test_student):
         'date_of_birth': '2006-12-06',
         'role': 'student'
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() is None
     db = TestingSessionLocal()
@@ -34,7 +30,7 @@ def test_add_student(test_student):
     assert model.role == request_data.get('role')
 
 
-def test_add_student_with_class(test_student, test_class):
+def test_add_student_with_class(token, test_student, test_class):
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
@@ -44,7 +40,7 @@ def test_add_student_with_class(test_student, test_class):
         'class_id': 1,
         'role': 'student'
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() is None
     db = TestingSessionLocal()
@@ -57,7 +53,7 @@ def test_add_student_with_class(test_student, test_class):
     assert model.role == request_data.get('role')
 
 
-def test_add_teacher_with_subject(test_teacher, test_subject):
+def test_add_teacher_with_subject(token, test_teacher, test_subject):
     request_data = {
         'first_name': 'Janina',
         'last_name': 'Borkowska',
@@ -67,12 +63,12 @@ def test_add_teacher_with_subject(test_teacher, test_subject):
         'subject_id': 1,
         'role': 'teacher'
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() is None
 
 
-def test_add_user_invalid_role():
+def test_add_user_invalid_role(token):
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
@@ -81,12 +77,12 @@ def test_add_user_invalid_role():
         'date_of_birth': '2006-12-06',
         'role': 'tchr'
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Invalid role: tchr. Allowed roles are 'admin', 'teacher','student'."}
 
 
-def test_add_user_username_exist(test_student):
+def test_add_user_username_exist(token, test_student):
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
@@ -95,12 +91,12 @@ def test_add_user_username_exist(test_student):
         'date_of_birth': '2006-12-06',
         'role': 'student'
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Username: j_bravo already exist.'}
 
 
-def test_add_student_class_not_exist():
+def test_add_student_class_not_exist(token):
     request_data = {
         'first_name': 'Marcin',
         'last_name': 'Balcerowicz',
@@ -111,12 +107,12 @@ def test_add_student_class_not_exist():
         'role': 'student'
 
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
-def test_add_teacher_subject_not_exist():
+def test_add_teacher_subject_not_exist(token):
     request_data = {
         'first_name': 'Jan',
         'last_name': 'Kujawa',
@@ -126,13 +122,13 @@ def test_add_teacher_subject_not_exist():
         'subject_id': 999,
         'role': 'teacher'
     }
-    response = client.post("admin/add-user", json=request_data)
+    response = client.post("admin/add-user", json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
-def test_show_all_students(test_student):
-    response = client.get('admin/students')
+def test_show_all_students(token, test_student):
+    response = client.get('admin/students', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_200_OK
     students = response.json()
     assert len(students) > 0
@@ -146,8 +142,8 @@ def test_show_all_students(test_student):
     assert student_data['role'] == 'student'
 
 
-def test_show_all_teachers(test_teacher):
-    response = client.get('admin/teachers')
+def test_show_all_teachers(token, test_teacher):
+    response = client.get('admin/teachers', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_200_OK
     teachers = response.json()
     assert len(teachers) > 0
@@ -160,8 +156,8 @@ def test_show_all_teachers(test_teacher):
     assert teacher_data['role'] == 'teacher'
 
 
-def test_show_student_detail(test_student):
-    response = client.get('admin/students/?username=j_bravo')
+def test_show_student_detail(token, test_student):
+    response = client.get('admin/students/?username=j_bravo', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_200_OK
     assert response.json() is not None
     students = response.json()
@@ -174,14 +170,14 @@ def test_show_student_detail(test_student):
     assert students['role'] == 'student'
 
 
-def test_show_student_detail_username_not_found():
-    response = client.get('admin/students/?username=b_bbb')
+def test_show_student_detail_username_not_found(token):
+    response = client.get('admin/students/?username=b_bbb', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with username: b_bbb not found'}
 
 
-def test_show_teacher_detail(test_teacher):
-    response = client.get('admin/teachers/?username=a_kowalska')
+def test_show_teacher_detail(token, test_teacher):
+    response = client.get('admin/teachers/?username=a_kowalska', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_200_OK
     assert response.json() is not None
     teachers = response.json()
@@ -193,19 +189,19 @@ def test_show_teacher_detail(test_teacher):
     assert teachers['role'] == 'teacher'
 
 
-def test_show_teacher_detail_username_not_found():
-    response = client.get('admin/teachers/?username=a_aaa')
+def test_show_teacher_detail_username_not_found(token):
+    response = client.get('admin/teachers/?username=a_aaa', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with username: a_aaa not found'}
 
 
-def test_edit_user(test_student):
+def test_edit_user(token, test_student):
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
         'username': 'a_kowalski'
     }
-    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     db = TestingSessionLocal()
     model = db.query(User).filter(User.username == 'a_kowalski').first()
@@ -214,86 +210,86 @@ def test_edit_user(test_student):
     assert model.username == request_data.get('username')
 
 
-def test_edit_user_username_not_found():
+def test_edit_user_username_not_found(token):
     request_data = {
         'first_name': 'Andrzej',
         'last_name': 'Kowalski',
         'username': 'a_kowalski'
     }
-    response = client.put('admin/edit-user/?username=testtest', json=request_data)
+    response = client.put('admin/edit-user/?username=testtest', json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {'detail': 'User with username: testtest not found'}
 
 
-def test_edit_user_username_already_exist(test_student, test_teacher):
+def test_edit_user_username_already_exist(token, test_student, test_teacher):
     request_data = {
         'first_name': 'Anastazja',
         'last_name': 'Kowalska',
         'username': 'a_kowalska'
     }
-    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Username: a_kowalska already exist.'}
 
 
-def test_edit_class_not_exist(test_student):
+def test_edit_class_not_exist(token, test_student):
     request_data = {
         'class_id': 999
     }
-    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Class with id: 999 does not exist'}
 
 
-def test_edit_subject_not_exist(test_teacher):
+def test_edit_subject_not_exist(token, test_teacher):
     request_data = {
         'subject_id': 999
     }
-    response = client.put('admin/edit-user/?username=a_kowalska', json=request_data)
+    response = client.put('admin/edit-user/?username=a_kowalska', json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': 'Subject with id: 999 does not exist'}
 
 
-def test_edit_invalid_role(test_student):
+def test_edit_invalid_role(token, test_student):
     request_data = {
         'role': 'tcher'
     }
-    response = client.put('admin/edit-user/?username=j_bravo', json=request_data)
+    response = client.put('admin/edit-user/?username=j_bravo', json=request_data, headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'detail': "Invalid role: tcher. Allowed roles are 'admin', 'teacher','student'."}
 
 
-def test_delete_user(test_student):
-    response = client.delete('admin/delete-user/1')
+def test_delete_user(token, test_student):
+    response = client.delete('admin/delete-user/1', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     db = TestingSessionLocal()
     model = db.query(User).filter(User.id == 1).first()
     assert model is None
 
 
-def test_delete_user_related_grades_error(test_grade):
-    response = client.delete('admin/delete-user/1')
+def test_delete_user_related_grades_error(token, test_grade):
+    response = client.delete('admin/delete-user/1', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 1 cannot be deleted because it is associated with table: grades.'}
 
 
-def test_delete_user_related_attendance_error(test_attendance):
-    response = client.delete('admin/delete-user/1')
+def test_delete_user_related_attendance_error(token, test_attendance):
+    response = client.delete('admin/delete-user/1', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 1 cannot be deleted because it is associated with table: attendance.'}
 
 
-def test_delete_teacher_related_grades_error(test_grade):
-    response = client.delete('admin/delete-user/2')
+def test_delete_teacher_related_grades_error(token, test_grade):
+    response = client.delete('admin/delete-user/2', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 2 cannot be deleted because it is associated with table: grades.'}
 
 
-def test_delete_teacher_related_attendance_error(test_attendance):
-    response = client.delete('admin/delete-user/2')
+def test_delete_teacher_related_attendance_error(token, test_attendance):
+    response = client.delete('admin/delete-user/2', headers=get_authorization_header(token))
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {
         'detail': 'User with id: 2 cannot be deleted because it is associated with table: attendance.'}

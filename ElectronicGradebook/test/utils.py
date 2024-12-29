@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from ..database import Base
 from ..models import User, Class, Subject, Grade, Attendance
-from ..routers.auth import bcrypt_context
+from ..routers.auth import bcrypt_context, create_access_token
 from sqlalchemy.pool import StaticPool
 
 SQLALCHEMY_DATABASE_URL = 'sqlite:///./testdb.db'
@@ -23,8 +23,14 @@ def override_get_db():
         db.close()
 
 
-def override_get_current_user():
-    return {'username': 'test', 'id': 1, 'role': 'admin'}
+def get_authorization_header(token: str):
+    return{"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def token():
+    data_user = {'username': 'test', 'id': 1, 'role': 'admin'}
+    return create_access_token(username=data_user.get('username'), user_id=data_user.get('id'),role=data_user.get('role'),expires_delta=timedelta(minutes=20))
 
 
 @pytest.fixture
