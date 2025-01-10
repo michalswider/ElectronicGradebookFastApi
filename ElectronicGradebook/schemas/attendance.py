@@ -1,5 +1,7 @@
 from datetime import date
+
 from pydantic import BaseModel, Field
+
 
 class AddAttendanceRequest(BaseModel):
     student_id: int = Field(gt=0)

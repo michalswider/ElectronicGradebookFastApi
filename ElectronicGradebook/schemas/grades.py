@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from datetime import date
+
+from pydantic import BaseModel, Field
+
 
 class AddGradeRequest(BaseModel):
     student_id: int = Field(gt=0)

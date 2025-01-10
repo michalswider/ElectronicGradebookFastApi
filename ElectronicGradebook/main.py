@@ -1,13 +1,16 @@
 from contextlib import asynccontextmanager
 from typing import Annotated
-from fastapi import FastAPI, Depends
+
+from fastapi import Depends, FastAPI
+from sqlalchemy.orm import Session
+
+from .database import engine
 from .handlers import setup_exception_handlers
 from .middleware.authentication_middleware import JWTMiddleware
 from .models import Base, User
-from .database import engine
-from .routers import admin_users, admin_subjects, admin_classes, teacher_grades, teacher_attendance, auth, student_panel
-from .routers.auth import get_db, bcrypt_context, SECRET_KEY, ALGORITHM
-from sqlalchemy.orm import Session
+from .routers import (admin_classes, admin_subjects, admin_users, auth,
+                      student_panel, teacher_attendance, teacher_grades)
+from .routers.auth import ALGORITHM, SECRET_KEY, bcrypt_context, get_db
 
 Base.metadata.create_all(bind=engine)
 
@@ -17,8 +20,13 @@ db_dependency = Annotated[Session, Depends(get_db)]
 def create_admin_user(db: db_dependency):
     admin_user = db.query(User).filter(User.username == "admin").first()
     if not admin_user:
-        admin_model = User(first_name="admin", last_name="admin", username="admin",
-                           hashed_password=bcrypt_context.hash("admin"), role="admin")
+        admin_model = User(
+            first_name="admin",
+            last_name="admin",
+            username="admin",
+            hashed_password=bcrypt_context.hash("admin"),
+            role="admin",
+        )
         db.add(admin_model)
         db.commit()
 

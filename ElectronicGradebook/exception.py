@@ -1,4 +1,3 @@
-
 class ApplicationException(Exception):
     def __init__(self, detail: str, status_code: int, user: str = "Anonymous"):
         self.detail = detail
@@ -14,7 +13,7 @@ class ApplicationException(Exception):
 
 class ExistException(ApplicationException):
     def __init__(self, detail: str, status_code: int = 400, user: str = "Anonymous"):
-        super().__init__(detail, status_code,user)
+        super().__init__(detail, status_code, user)
 
 
 class NotFoundException(ApplicationException):
@@ -28,5 +27,5 @@ class InvalidException(ApplicationException):
 
 
 class ForeignKeyConstraintException(ApplicationException):
-    def __init__(self, detail: str, status_code: int = 409,  user: str = "Anonymous"):
+    def __init__(self, detail: str, status_code: int = 409, user: str = "Anonymous"):
         super().__init__(detail, status_code, user)
